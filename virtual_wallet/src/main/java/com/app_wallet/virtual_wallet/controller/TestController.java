@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class TestController {
     @GetMapping("/say")
     public String sayHi(){
-        return "index";
+        return "test";
     }
 
 }
