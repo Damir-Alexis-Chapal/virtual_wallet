@@ -12,4 +12,9 @@ public class TestController {
         return "test";
     }
 
+    @GetMapping("/GoToLogin")
+    public String log(){
+        return "login";
+    }
+
 }

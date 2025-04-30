@@ -12,28 +12,30 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // Define usuarios en memoria
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("admin")
                 .password("1234")
-                .roles("USER")
+                .roles("ADMIN") // Cambiado a ADMIN para que funcione con /admin/**
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
 
-    // Configura reglas de seguridad HTTP
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // solo admins pueden entrar a /admin/*
-                        .anyRequest().authenticated()  // el resto necesita autenticación
+                        .requestMatchers("/", "/home/**", "/css/**", "/js/**", "/img/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                .formLogin() // habilita formulario de login por defecto
+                .formLogin() // login con formulario
                 .and()
-                .logout(); // habilita logout
+                .oauth2Login() // login con Google
+                .and()
+                .logout(); // logout habilitado
+
         return http.build();
     }
 }
