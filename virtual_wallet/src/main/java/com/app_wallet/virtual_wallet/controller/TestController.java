@@ -7,14 +7,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/home")
 public class TestController {
-    @GetMapping("/say")
+    @GetMapping("/welcome")
     public String sayHi(){
         return "test";
     }
 
-    @GetMapping("/GoToLogin")
+    @GetMapping("/askforlogin")
+    public String askLog(){
+        return "ask-for-log-sign-in";
+    }
+
+    @GetMapping("/gotosignin")
     public String log(){
-        return "login";
+        return "sign-in";
     }
 
 }
