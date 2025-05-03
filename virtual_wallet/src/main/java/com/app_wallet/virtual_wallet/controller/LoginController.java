@@ -20,4 +20,9 @@ public class LoginController {
     public String dashboard() {
         return "dashboard"; // (Después creamos dashboard.html)
     }
+
+    @GetMapping("/gotoapp")
+    public String goToApp() {
+        return "app";
+    }
 }
