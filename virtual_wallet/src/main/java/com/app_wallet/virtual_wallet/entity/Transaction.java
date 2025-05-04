@@ -7,14 +7,14 @@ public class Transaction {
 
     private Long id;
     private BigDecimal amount;
-    private String type; // DEPOSITO, RETIRO, TRANSFERENCIA
+    private TransactionType type; // DEPOSITO, RETIRO, TRANSFERENCIA
     private LocalDateTime date;
     private Account account;
     private String description;
 
     public Transaction() {
     }
-    public Transaction(Long id, BigDecimal amount, String type, LocalDateTime date, Account account, String description) {
+    public Transaction(Long id, BigDecimal amount, TransactionType type, LocalDateTime date, Account account, String description) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -39,11 +39,11 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getType() {
+    public TransactionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TransactionType type) {
         this.type = type;
     }
 
