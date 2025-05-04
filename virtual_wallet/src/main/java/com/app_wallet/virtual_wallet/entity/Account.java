@@ -6,18 +6,17 @@ import java.math.BigDecimal;
 
 public class Account {
     private Long id;
-    private String type; // "Ahorros", "Gastos diarios", etc.
     private BigDecimal balance;
     private User user;
+    LinkedList<Account> accounts = new LinkedList<>();
 
     private LinkedList<Transaction> transactionList = new LinkedList<>();
     private LinkedList<Purse> purses = new LinkedList<>();
 
     public Account() {
     }
-    public Account(Long id, String type, BigDecimal balance, User user, LinkedList<Transaction> transactionList,  LinkedList<Purse> purses) {
+    public Account(Long id, BigDecimal balance, User user, LinkedList<Transaction> transactionList,  LinkedList<Purse> purses) {
         this.id = id;
-        this.type = type;
         this.balance = balance;
         this.user = user;
         this.transactionList = transactionList;
@@ -39,14 +38,6 @@ public class Account {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public BigDecimal getBalance() {
@@ -71,5 +62,13 @@ public class Account {
 
     public void setTransactionList(LinkedList<Transaction> transactionList) {
         this.transactionList = transactionList;
+    }
+
+    public LinkedList<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(LinkedList<Account> accounts) {
+        this.accounts = accounts;
     }
 }

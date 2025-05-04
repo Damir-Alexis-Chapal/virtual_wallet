@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class Purse {
     private String id;
     private String name;
+    private String type; // "Ahorros", "Gastos diarios", etc.
     private String description;
     BigDecimal amount;
 
@@ -48,5 +49,13 @@ public class Purse {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
