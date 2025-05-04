@@ -1,4 +1,4 @@
 package com.app_wallet.virtual_wallet.dto;
 
-public class ExpenseReportDTO {
+public class AccountDTO {
 }
