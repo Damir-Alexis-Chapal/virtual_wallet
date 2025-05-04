@@ -8,18 +8,19 @@ public class User {
     private String email;
     private String password;
     private SystemPoints systemPoints;
-    private LinkedList<Account> accounts = new LinkedList<>();
+
+    LinkedList<Account> accounts = new LinkedList<>();
+    LinkedList<Notification> notifications = new LinkedList<>();
 
     public User() {
     }
 
-    public User(long id, String name, String email, String password, SystemPoints systemPoints, LinkedList<Account> accounts) {
+    public User(long id, String name, String email, String password, SystemPoints systemPoints) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.systemPoints = systemPoints;
-        this.accounts = accounts;
     }
 
     public long getId() {
@@ -68,5 +69,17 @@ public class User {
 
     public void setAccounts(LinkedList<Account> accounts) {
         this.accounts = accounts;
+    }
+
+    public LinkedList<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(LinkedList<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public void addNotification(Notification notification) {
+        this.notifications.add(notification);
     }
 }
