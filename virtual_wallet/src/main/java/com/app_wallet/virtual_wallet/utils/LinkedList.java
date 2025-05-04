@@ -55,7 +55,7 @@ public class LinkedList<T>{
             }
         }
         if(node!=null){
-            return node.getValue();
+            return node.getData();
         }else{
             return null;
         }
@@ -124,17 +124,11 @@ public class LinkedList<T>{
     public int getIndex(T value) {
         int i = 0;
         for( Node<T> aux = head ; aux!=null ; aux = aux.getNext() ) {
-            if( aux.getValue().equals(value) ) {
+            if( aux.getData().equals(value) ) {
                 return i;
             }
             i++;
         }
         return -1;
     }
-
-
-
-
-
-
 }

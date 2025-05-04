@@ -1,25 +1,25 @@
 package com.app_wallet.virtual_wallet.utils;
 
 public class Node <T> {
-    public T value;
+    public T data;
     public Node<T> next;
 
     public Node(T value) {
-        this.value = value;
+        this.data = value;
         this.next = null;
     }
 
     public Node(T value, Node<T> next) {
-        this.value = value;
+        this.data = value;
         this.next = next;
     }
 
-    public T getValue() {
-        return value;
+    public T getData() {
+        return data;
     }
 
-    public void setValue(T value) {
-        this.value = value;
+    public void setData(T value) {
+        this.data = data;
     }
     public Node<T> getNext() {
         return next;
