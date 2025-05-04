@@ -3,16 +3,16 @@ import com.app_wallet.virtual_wallet.model.Range;
 
 public class SystemPoints {
     private Long id;
-    private int acumulatedPoints;
+    private int accumulatedPoints;
     private Range range;
     private User user;
 
     public SystemPoints() {
     }
 
-    public SystemPoints(Long id, int acumulatedPoints, Range range, User user) {
+    public SystemPoints(Long id, int accumulatedPoints, Range range, User user) {
         this.id = id;
-        this.acumulatedPoints = acumulatedPoints;
+        this.accumulatedPoints = accumulatedPoints;
         this.range = range;
         this.user = user;
     }
@@ -25,12 +25,12 @@ public class SystemPoints {
         this.id = id;
     }
 
-    public int getAcumulatedPoints() {
-        return acumulatedPoints;
+    public int getAccumulatedPoints() {
+        return accumulatedPoints;
     }
 
-    public void setAcumulatedPoints(int acumulatedPoints) {
-        this.acumulatedPoints = acumulatedPoints;
+    public void setAccumulatedPoints(int accumulatedPoints) {
+        this.accumulatedPoints = accumulatedPoints;
     }
 
     public Range getRange() {
@@ -49,4 +49,3 @@ public class SystemPoints {
         this.user = user;
     }
 }
-

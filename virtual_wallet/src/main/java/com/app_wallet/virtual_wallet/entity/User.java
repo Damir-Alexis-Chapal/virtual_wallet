@@ -3,22 +3,23 @@ package com.app_wallet.virtual_wallet.entity;
 import com.app_wallet.virtual_wallet.utils.LinkedList;
 
 public class User {
-    private  long id;
+    private long id;
     private String name;
     private String email;
     private String password;
     private SystemPoints systemPoints;
-    LinkedList<Account> accounts = new LinkedList<>();
+    private LinkedList<Account> accounts = new LinkedList<>();
 
     public User() {
-
     }
-    public User(long id, String name, String email, String password, SystemPoints systemPoints) {
+
+    public User(long id, String name, String email, String password, SystemPoints systemPoints, LinkedList<Account> accounts) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.systemPoints = systemPoints;
+        this.accounts = accounts;
     }
 
     public long getId() {
