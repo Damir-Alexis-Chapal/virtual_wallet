@@ -3,6 +3,10 @@ package com.app_wallet.virtual_wallet.utils;
 public class Deque<T> extends Queue<T> {
 
 	public Deque() {
+		super();
+		front = null;
+		rear = null;
+		size = 0;
 	}
 
 	public void addLast(T data) {
@@ -12,7 +16,7 @@ public class Deque<T> extends Queue<T> {
 	public void addFirst(T data) {
 		Node<T> newNode = new Node<>(data);
 		if (isEmpty()) {
-			rear = newNode;
+			front = rear = newNode;
 		}
 		newNode.setNext(front);
 		front = newNode;
