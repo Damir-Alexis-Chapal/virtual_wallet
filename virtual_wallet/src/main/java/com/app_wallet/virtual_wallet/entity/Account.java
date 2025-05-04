@@ -1,34 +1,23 @@
 package com.app_wallet.virtual_wallet.entity;
 
 import com.app_wallet.virtual_wallet.utils.LinkedList;
-
 import java.math.BigDecimal;
 
 public class Account {
     private Long id;
     private BigDecimal balance;
     private User user;
-    LinkedList<Account> accounts = new LinkedList<>();
-
     private LinkedList<Transaction> transactionList = new LinkedList<>();
     private LinkedList<Purse> purses = new LinkedList<>();
 
     public Account() {
     }
-    public Account(Long id, BigDecimal balance, User user, LinkedList<Transaction> transactionList,  LinkedList<Purse> purses) {
+
+    public Account(Long id, BigDecimal balance, User user, LinkedList<Transaction> transactionList, LinkedList<Purse> purses) {
         this.id = id;
         this.balance = balance;
         this.user = user;
         this.transactionList = transactionList;
-        this.purses = purses;
-
-    }
-
-    public LinkedList<Purse> getPurses() {
-        return purses;
-    }
-
-    public void setPurses(LinkedList<Purse> purses) {
         this.purses = purses;
     }
 
@@ -64,11 +53,11 @@ public class Account {
         this.transactionList = transactionList;
     }
 
-    public LinkedList<Account> getAccounts() {
-        return accounts;
+    public LinkedList<Purse> getPurses() {
+        return purses;
     }
 
-    public void setAccounts(LinkedList<Account> accounts) {
-        this.accounts = accounts;
+    public void setPurses(LinkedList<Purse> purses) {
+        this.purses = purses;
     }
 }
