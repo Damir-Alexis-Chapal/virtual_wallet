@@ -5,16 +5,14 @@ public class SystemPoints {
     private Long id;
     private int accumulatedPoints;
     private Range range;
-    private User user;
 
     public SystemPoints() {
     }
 
-    public SystemPoints(Long id, int accumulatedPoints, Range range, User user) {
+    public SystemPoints(Long id, int accumulatedPoints, Range range) {
         this.id = id;
         this.accumulatedPoints = accumulatedPoints;
         this.range = range;
-        this.user = user;
     }
 
     public Long getId() {
@@ -39,13 +37,5 @@ public class SystemPoints {
 
     public void setRange(Range range) {
         this.range = range;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }
