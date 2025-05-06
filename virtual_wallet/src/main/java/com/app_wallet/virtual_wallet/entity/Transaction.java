@@ -1,5 +1,7 @@
 package com.app_wallet.virtual_wallet.entity;
 
+import com.app_wallet.virtual_wallet.model.TransactionType;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
