@@ -1,5 +1,7 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.Iterator;
+
 public class LinkedList<T>{
 
     private Node<T> head;
@@ -130,5 +132,33 @@ public class LinkedList<T>{
             i++;
         }
         return -1;
+    }
+
+    public Iterator<T> iterator() {
+        return null;
+    }
+
+    public Node<T> getHead() {
+        return head;
+    }
+
+    public void setHead(Node<T> head) {
+        this.head = head;
+    }
+
+    public Node<T> getTail() {
+        return tail;
+    }
+
+    public void setTail(Node<T> tail) {
+        this.tail = tail;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }
