@@ -41,10 +41,10 @@ public class AccountService {
     }
 
     public AccountDTO updateAccount(AccountDTO account){
-        for (int i = 0; i < accounts.size(); i++) {
-            AccountDTO acc = accounts.get(i);
+        for (int i = 0; i < accounts.getSize(); i++) {
+            AccountDTO acc = accounts.getValue(i);
             if (acc.getId().equals(account.getId())) {
-                accounts.remove(i);      // Elimina la cuenta antigua
+                accounts.deleteByIndex(i);      // Elimina la cuenta antigua
                 accounts.add(account);   // Agrega la cuenta nueva
                 return account;          // Devuelve la cuenta actualizada
             }

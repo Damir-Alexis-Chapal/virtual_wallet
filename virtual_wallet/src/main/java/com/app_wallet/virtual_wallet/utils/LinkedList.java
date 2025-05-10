@@ -183,4 +183,12 @@ public class LinkedList<T>{
     public void setSize(int size) {
         this.size = size;
     }
+
+    public void toUtil(){
+        ArrayList<T> list = new ArrayList<>();
+        while (head != null) {
+            list.add(head.getData());
+            head = head.getNext();
+        }
+    }
 }
