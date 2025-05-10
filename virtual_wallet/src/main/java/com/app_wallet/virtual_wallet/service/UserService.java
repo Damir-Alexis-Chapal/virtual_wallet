@@ -22,8 +22,19 @@ public class UserService {
     }
     public void saveUser(UserDTO user){
     }
-    public void updateUser(UserDTO user){
+    public UserDTO updateUser(UserDTO userDTO) {
+        User user = userRepository.findById(userDTO.getId()).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
+
+        userRepository.save(user);
+        return convertToUserDTO(user);
     }
+
     public void deleteUser(UserDTO user){
     }
 
