@@ -1,5 +1,8 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Stack<T> {
     private Node<T> peak;
     private int size;
@@ -76,4 +79,21 @@ public class Stack<T> {
         return size == 0;
     }
 
+    public List<T> toJavaList() {
+        List<T> list = new ArrayList<>();
+        Node<T> current = peak;
+        while (current != null) {
+            list.add(current.getData());
+            current = current.getNext();
+        }
+        return list;
+    }
+
+    public static <T> Stack<T> fromJavaList(List<T> javaList) {
+        Stack<T> stack = new Stack<>();
+        for (int i = javaList.size() - 1; i >= 0; i--) {
+            stack.push(javaList.get(i));
+        }
+        return stack;
+    }
 }
