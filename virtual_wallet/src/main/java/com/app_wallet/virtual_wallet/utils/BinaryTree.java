@@ -33,7 +33,6 @@ public class BinaryTree {
     }
 
     public void addRoot(int data) {
-
         root = addRecursive(root,  data);
     }
 
