@@ -1,5 +1,8 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Deque<T> extends Queue<T> {
 
 	public Deque() {
@@ -17,9 +20,10 @@ public class Deque<T> extends Queue<T> {
 		Node<T> newNode = new Node<>(data);
 		if (isEmpty()) {
 			front = rear = newNode;
+		} else {
+			newNode.setNext(front);
+			front = newNode;
 		}
-		newNode.setNext(front);
-		front = newNode;
 		size++;
 	}
 
@@ -48,5 +52,23 @@ public class Deque<T> extends Queue<T> {
 			throw new Exception("Remove from empty deque");
 		}
 		return value;
+	}
+
+	public List<T> toJavaList() {
+		List<T> list = new ArrayList<>();
+		Node<T> current = front;
+		while (current != null) {
+			list.add(current.getData());
+			current = current.getNext();
+		}
+		return list;
+	}
+
+	public static <T> Deque<T> fromJavaList(List<T> javaList) {
+		Deque<T> deque = new Deque<>();
+		for (T item : javaList) {
+			deque.addLast(item);
+		}
+		return deque;
 	}
 }
