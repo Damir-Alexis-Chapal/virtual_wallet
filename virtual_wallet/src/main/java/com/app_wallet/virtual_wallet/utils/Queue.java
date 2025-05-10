@@ -1,5 +1,8 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Queue<T> {
 	public Node<T> front;
 	public Node<T> rear;
@@ -99,5 +102,23 @@ public class Queue<T> {
 			reverse();
 			enqueue(data);
 		}
+	}
+
+	public List<T> toJavaList() {
+		List<T> list = new ArrayList<>();
+		Node<T> current = front;
+		while (current != null) {
+			list.add(current.getData());
+			current = current.getNext();
+		}
+		return list;
+	}
+
+	public static <T> Queue<T> fromJavaList(List<T> javaList) {
+		Queue<T> queue = new Queue<>();
+		for (T item : javaList) {
+			queue.enqueue(item);
+		}
+		return queue;
 	}
 }
