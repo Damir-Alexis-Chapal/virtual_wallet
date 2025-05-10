@@ -3,6 +3,7 @@ package com.app_wallet.virtual_wallet.service;
 import com.app_wallet.virtual_wallet.dto.UserDTO;
 import com.app_wallet.virtual_wallet.entity.User;
 import com.app_wallet.virtual_wallet.repository.UserRepository;
+import com.app_wallet.virtual_wallet.utils.LinkedList;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,18 +28,27 @@ public class UserService {
         if (user == null) {
             return null;
         }
-
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         userRepository.save(user);
         return convertToUserDTO(user);
     }
 
-    public void deleteUser(UserDTO user){
+    public boolean deleteUser(UserDTO userDTO){
+        User user = userRepository.findById(userDTO.getId()).orElse(null);
+        if (user == null) {
+            return false;
+        }
+        userRepository.delete(user);
+        return true;
     }
 
     public UserDTO getUserByName(String name) {
-        return null;
+        User user = userRepository.findByName(name);
+        if (user == null) {
+            return null;
+        }
+        return convertToUserDTO(user);
     }
 
     public UserDTO getUserById(Long id) {
@@ -62,6 +72,13 @@ public class UserService {
         return user;
     }
 
-
+    public LinkedList<UserDTO> getAllUsers() {
+        Iterable<User> users = userRepository.findAll();
+        LinkedList<UserDTO> dtos = new LinkedList<>();
+        for (User user : users) {
+            dtos.add(convertToUserDTO(user));
+        }
+        return dtos;
+    }
 
 }

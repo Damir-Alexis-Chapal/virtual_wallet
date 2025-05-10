@@ -1,6 +1,8 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class LinkedList<T>{
 
@@ -132,6 +134,26 @@ public class LinkedList<T>{
             i++;
         }
         return -1;
+    }
+
+    //Convert this LinkedList to a Java List
+    public List<T> toJavaList() {
+        List<T> list = new ArrayList<>();
+        Node<T> current = this.head;
+        while (current != null) {
+            list.add(current.getData());
+            current = current.getNext();
+        }
+        return list;
+    }
+
+    //Convert a Java List to my LinkedList
+    public static <T> LinkedList<T> fromJavaList(List<T> javaList) {
+        LinkedList<T> customList = new LinkedList<>();
+        for (T item : javaList) {
+            customList.addTail(item);  // To maintain the original order
+        }
+        return customList;
     }
 
     public Iterator<T> iterator() {
