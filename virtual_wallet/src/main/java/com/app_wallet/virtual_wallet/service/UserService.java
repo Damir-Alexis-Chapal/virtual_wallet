@@ -30,7 +30,6 @@ public class UserService {
 
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
-
         userRepository.save(user);
         return convertToUserDTO(user);
     }
