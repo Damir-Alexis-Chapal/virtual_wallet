@@ -8,12 +8,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.app_wallet.virtual_wallet")
 public class VirtualWalletApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(VirtualWalletApplication.class, args);
     }
+    /*
     @Bean
     CommandLineRunner initDatabase(UserService userService) {
         return args -> {
@@ -30,5 +31,7 @@ public class VirtualWalletApplication {
             System.out.println("Usuario de prueba creado!");
         };
     }
+     */
+
 
 }

@@ -7,11 +7,12 @@ public class UserDTO {
     private Long id;
     private String name;
     private String email;
+    private String password;
     private SystemPointsEntity systemPoints;
-    private List<Long> accountIds; // Solo incluimos los IDs de las cuentas
-    private List<Long> notificationIds; // Solo incluimos los IDs de las notificaciones
+    private List<Long> accountIds;
+    private List<Long> notificationIds;
 
-    // Constructores
+
     public UserDTO() {
     }
 
@@ -22,7 +23,14 @@ public class UserDTO {
         this.systemPoints = systemPoints;
     }
 
-    // Getters y Setters
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public Long getId() {
         return id;
     }
