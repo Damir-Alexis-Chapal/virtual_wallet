@@ -1,26 +1,35 @@
 package com.app_wallet.virtual_wallet.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-public class Notification {
-    private Long id;
-    private String message;
-    private LocalDateTime date;
-    private boolean read;
-    private User user;
+@Entity
+public class NotificationEntity {
 
-    public Notification() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String message;
+
+    private LocalDateTime date;
+
+    private boolean read;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
+    public NotificationEntity() {
     }
 
-    public Notification(Long id, String message, LocalDateTime date, boolean read, User user) {
+    public NotificationEntity(Long id, String message, LocalDateTime date, boolean read, UserEntity user) {
         this.id = id;
         this.message = message;
         this.date = date;
         this.read = read;
         this.user = user;
     }
-
-    // Getters and setters
 
     public Long getId() {
         return id;
@@ -54,11 +63,11 @@ public class Notification {
         this.read = read;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserEntity user) {
         this.user = user;
     }
 }

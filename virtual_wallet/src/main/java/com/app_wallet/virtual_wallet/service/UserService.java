@@ -1,84 +1,69 @@
 package com.app_wallet.virtual_wallet.service;
 
 import com.app_wallet.virtual_wallet.dto.UserDTO;
-import com.app_wallet.virtual_wallet.entity.User;
+import com.app_wallet.virtual_wallet.repository.CustomUserRepository;
 import com.app_wallet.virtual_wallet.repository.UserRepository;
-import com.app_wallet.virtual_wallet.utils.LinkedList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService {
 
+    private final CustomUserRepository customUserRepository;
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    @Autowired
+    public UserService(CustomUserRepository customUserRepository,
+                       UserRepository userRepository) {
+        this.customUserRepository = customUserRepository;
         this.userRepository = userRepository;
     }
 
+    // Crear un nuevo usuario
+    public UserDTO createUser(UserDTO userDTO) {
+        return customUserRepository.save(userDTO);
+    }
 
-    public UserDTO createUser(UserDTO userDTO){
-        User user = convertToUserEntity(userDTO);
-        userRepository.save(user);
-        return convertToUserDTO(user);
+    // Obtener usuario por ID
+    public Optional<UserDTO> getUserById(Long id) {
+        return customUserRepository.findDtoById(id);
     }
-    public void saveUser(UserDTO user){
+
+    // Obtener todos los usuarios como DTOs
+    public List<UserDTO> getAllUsers() {
+        return customUserRepository.findAllDtos();
     }
-    public UserDTO updateUser(UserDTO userDTO) {
-        User user = userRepository.findById(userDTO.getId()).orElse(null);
-        if (user == null) {
-            return null;
+
+    // Actualizar un usuario
+    public Optional<UserDTO> updateUser(Long id, UserDTO updatedDTO) {
+        if (!id.equals(updatedDTO.getId())) {
+            throw new IllegalArgumentException("ID in path doesn't match ID in DTO");
         }
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        userRepository.save(user);
-        return convertToUserDTO(user);
+        return Optional.of(customUserRepository.update(updatedDTO));
     }
 
-    public boolean deleteUser(UserDTO userDTO){
-        User user = userRepository.findById(userDTO.getId()).orElse(null);
-        if (user == null) {
-            return false;
+    // Eliminar usuario por ID
+    public boolean deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
         }
-        userRepository.delete(user);
-        return true;
+        return false;
     }
 
-    public UserDTO getUserByName(String name) {
-        User user = userRepository.findByName(name);
-        if (user == null) {
-            return null;
-        }
-        return convertToUserDTO(user);
+    // Métodos adicionales específicos de negocio
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
-    public UserDTO getUserById(Long id) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            return null;
-        }
-        return convertToUserDTO(user);
+    /*
+    public Optional<UserDTO> getUserByEmail(String email) {
+        return userRepository.findByEmail(email).map(userRepositoryExtensions::convertToDto);
     }
-
-    public UserDTO convertToUserDTO(User user) {
-        return new UserDTO(user.getId(), user.getName(), user.getEmail());
-    }
-
-    public User convertToUserEntity(UserDTO userDTO) {
-        User user = new User();
-        user.setId(userDTO.getId());
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword("");
-        return user;
-    }
-
-    public LinkedList<UserDTO> getAllUsers() {
-        Iterable<User> users = userRepository.findAll();
-        LinkedList<UserDTO> dtos = new LinkedList<>();
-        for (User user : users) {
-            dtos.add(convertToUserDTO(user));
-        }
-        return dtos;
-    }
-
+     */
 }

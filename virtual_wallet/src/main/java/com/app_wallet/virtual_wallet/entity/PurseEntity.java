@@ -2,17 +2,17 @@ package com.app_wallet.virtual_wallet.entity;
 
 import java.math.BigDecimal;
 
-public class Purse {
+public class PurseEntity {
     private String id;
     private String name;
     private String type; // "Ahorros", "Gastos diarios", etc.
     private String description;
     private BigDecimal amount; // le agregué private
 
-    public Purse() {
+    public PurseEntity() {
     }
 
-    public Purse(String id, String name, String type, String description, BigDecimal amount) {
+    public PurseEntity(String id, String name, String type, String description, BigDecimal amount) {
         this.id = id;
         this.name = name;
         this.type = type;

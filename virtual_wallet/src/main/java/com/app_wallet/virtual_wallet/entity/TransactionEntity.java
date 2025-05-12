@@ -1,22 +1,20 @@
 package com.app_wallet.virtual_wallet.entity;
 
-import com.app_wallet.virtual_wallet.model.TransactionType;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Transaction {
+public class TransactionEntity {
 
     private Long id;
     private BigDecimal amount;
     private String type; // DEPOSITO, RETIRO, TRANSFERENCIA
     private LocalDateTime date;
-    private Account account;
+    private AccountEntity account;
     private String description;
 
-    public Transaction() {
+    public TransactionEntity() {
     }
-    public Transaction(Long id, BigDecimal amount, String type, LocalDateTime date, Account account, String description) {
+    public TransactionEntity(Long id, BigDecimal amount, String type, LocalDateTime date, AccountEntity account, String description) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -57,11 +55,11 @@ public class Transaction {
         this.date = date;
     }
 
-    public Account getAccount() {
+    public AccountEntity getAccount() {
         return account;
     }
 
-    public void setAccount(Account account) {
+    public void setAccount(AccountEntity account) {
         this.account = account;
     }
 

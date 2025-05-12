@@ -2,15 +2,15 @@ package com.app_wallet.virtual_wallet.entity;
 
 import java.time.LocalDate;
 
-public class ScheduledTransaction {
+public class ScheduledTransactionEntity {
     private Long id;
-    private Transaction transaction;
+    private TransactionEntity transaction;
     private LocalDate date;
 
-    public ScheduledTransaction() {
+    public ScheduledTransactionEntity() {
     }
 
-    public ScheduledTransaction(Long id, Transaction transaction, LocalDate date) {
+    public ScheduledTransactionEntity(Long id, TransactionEntity transaction, LocalDate date) {
         this.id = id;
         this.transaction = transaction;
         this.date = date;
@@ -24,11 +24,11 @@ public class ScheduledTransaction {
         this.id = id;
     }
 
-    public Transaction getTransaction() {
+    public TransactionEntity getTransaction() {
         return transaction;
     }
 
-    public void setTransaction(Transaction transaction) {
+    public void setTransaction(TransactionEntity transaction) {
         this.transaction = transaction;
     }
 

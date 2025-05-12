@@ -23,7 +23,7 @@ public class PurseService {
         }
     }
     public PurseDTO updatePurse(PurseDTO purse){
-        for (int i = 0; i < purses.getSize(); i++) {
+        for (int i = 0; i < purses.size(); i++) {
             PurseDTO pur = purses.getValue(i);
             if (pur.getId().equals(purse.getId())) {
                 purses.deleteByIndex(i);      // Elimina la cuenta antigua

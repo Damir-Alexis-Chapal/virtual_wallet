@@ -1,16 +1,16 @@
 package com.app_wallet.virtual_wallet.entity;
 
-public class Benefit {
+public class BenefitEntity {
     private Long id;
     private String title;
     private String description;
     private int pointsRequired;
     private boolean isActive;
 
-    public Benefit() {
+    public BenefitEntity() {
     }
 
-    public Benefit(Long id, String title, String description, int pointsRequired, boolean isActive) {
+    public BenefitEntity(Long id, String title, String description, int pointsRequired, boolean isActive) {
         this.id = id;
         this.title = title;
         this.description = description;
