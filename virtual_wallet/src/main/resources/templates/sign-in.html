@@ -19,39 +19,38 @@
                 <div class="card shadow p-4">
                     <h1 class="fw-bold text-center mb-3">Virtual Wallet</h1>
                     <h5 class="fw-bold text-center mb-4">Sign in with your Account</h5>
-                    <form>
+
+                    <form id="login-form">
                         <div class="mb-3">
                             <label for="inputEmail1" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="inputEmail1" aria-describedby="emailHelp">
-                            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                            <input type="email" class="form-control" id="inputEmail1" name="email" required>
                         </div>
                         <div class="mb-3">
                             <label for="inputPassword1" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="inputPassword1">
+                            <input type="password" class="form-control" id="inputPassword1" name="password" required>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="stayConnected">
-                            <label class="form-check-label" for="stayConnected">Stay in</label>
+                            <label class="form-check-label" for="stayConnected">Stay connected</label>
                         </div>
-                        <a href="/gotoapp" class="btn btn-primary w-100">Continue</a>
+                        <button type="submit" class="btn btn-primary w-100">Continue</button>
+                    </form>
 
-                        <div class="text-center mt-3">
+                    <div class="text-center mt-3">
                         <span>
                             Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#register-modal">Sign up here</a><br>
                             <a href="#">Reset password</a>
                         </span>
-                        </div>
+                    </div>
 
-                        <div class="text-center my-4">
-                            <div class="mb-2">Sign in with:</div>
-                            <div class="d-flex flex-column gap-2">
-                                <a href="/oauth2/authorization/google" target="_blank"
-                                   class="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2">
-                                    <i class="bi bi-google"></i><span>Google</span>
-                                </a>
-                            </div>
+                    <div class="text-center my-4">
+                        <div class="mb-2">Sign in with:</div>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="/oauth2/authorization/google" class="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-google"></i><span>Google</span>
+                            </a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,6 +96,21 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-success text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Success</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Your account has been successfully registered!
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('userPassword');
@@ -113,8 +127,70 @@
         }
     }
 </script>
+<script>
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+        e.preventDefault();
 
+        const form = e.target;
+        const formData = new FormData(form);
 
+        fetch("/users/register", {
+            method: "POST",
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al registrar");
+                }
+                return response.text();
+            })
+            .then(data => {
+
+                const registerModal = bootstrap.Modal.getInstance(document.getElementById("register-modal"));
+                registerModal.hide();
+
+                // Mostrar modal de éxito
+                const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                successModal.show();
+
+                form.reset();
+            })
+            .catch(error => {
+                alert("Hubo un error al registrar el usuario.");
+                console.error(error);
+            });
+    });
+</script>
+
+<!-- Script para enviar los datos -->
+<script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('inputEmail1').value;
+        const password = document.getElementById('inputPassword1').value;
+
+        fetch('/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        })
+            .then(response => {
+                if (response.ok) {
+
+                    window.location.href = '/gotoapp';
+                } else {
+                    alert('Login failed. Please check your credentials.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while logging in.');
+            });
+    });
+</script>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

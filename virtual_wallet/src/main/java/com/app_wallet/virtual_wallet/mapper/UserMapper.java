@@ -53,7 +53,7 @@ public class UserMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setEmail(entity.getEmail());
-
+        dto.setPassword(entity.getPassword());
         return dto;
     }
 

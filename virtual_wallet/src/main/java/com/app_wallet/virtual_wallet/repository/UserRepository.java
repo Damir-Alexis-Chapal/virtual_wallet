@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
     boolean existsByEmail(String email);
+
     /*
 
      // Clase interna con implementaciones default para manejar DTOs

@@ -42,5 +42,10 @@ public class CustomUserRepository {
         }
         return save(userDTO);
     }
+    public Optional<UserDTO> findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(userMapper::entityToDto);
+    }
+
 }
 

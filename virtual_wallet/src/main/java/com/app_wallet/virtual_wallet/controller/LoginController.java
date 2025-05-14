@@ -11,15 +11,6 @@ public class LoginController {
         return "ask-for-log-sign-in"; // ask-for-log-sign-in.html
     }
 
-    @GetMapping("/")
-    public String homeRedirect() {
-        return "redirect:/login";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard"; // (Después creamos dashboard.html)
-    }
 
     @GetMapping("/gotoapp")
     public String goToApp() {

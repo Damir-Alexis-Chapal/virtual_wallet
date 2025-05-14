@@ -61,9 +61,6 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    /*
-    public Optional<UserDTO> getUserByEmail(String email) {
-        return userRepository.findByEmail(email).map(userRepositoryExtensions::convertToDto);
-    }
-     */
+
+
 }
