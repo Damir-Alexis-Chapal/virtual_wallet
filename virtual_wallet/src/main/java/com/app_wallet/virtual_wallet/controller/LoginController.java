@@ -12,8 +12,10 @@ public class LoginController {
     }
 
 
+    /*
     @GetMapping("/gotoapp")
     public String goToApp() {
         return "app";
     }
+     */
 }
