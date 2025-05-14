@@ -5,33 +5,28 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "account_entity")
 public class AccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private BigDecimal balance;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id") // Esto conecta con `mappedBy = "user"` en UserEntity
-    private UserEntity user;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Transient
-    private LinkedList<TransactionEntity> transactionList = new LinkedList<>();
-
-    @Transient
-    private LinkedList<PurseEntity> purses = new LinkedList<>();
 
     public AccountEntity() {
     }
 
-    public AccountEntity(Long id, BigDecimal balance, UserEntity user, LinkedList<TransactionEntity> transactionList, LinkedList<PurseEntity> purses) {
+    public AccountEntity(Long id, BigDecimal balance, Long userId) {
         this.id = id;
         this.balance = balance;
-        this.user = user;
-        this.transactionList = transactionList;
-        this.purses = purses;
+        this.userId = userId;
+
     }
 
     public Long getId() {
@@ -50,27 +45,11 @@ public class AccountEntity {
         this.balance = balance;
     }
 
-    public LinkedList<TransactionEntity> getTransactionList() {
-        return transactionList;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setTransactionList(LinkedList<TransactionEntity> transactionList) {
-        this.transactionList = transactionList;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
-
-    public LinkedList<PurseEntity> getPurses() {
-        return purses;
-    }
-
-    public void setPurses(LinkedList<PurseEntity> purses) {
-        this.purses = purses;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

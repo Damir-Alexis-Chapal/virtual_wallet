@@ -1,8 +1,6 @@
 package com.app_wallet.virtual_wallet.entity;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "user_entity")
@@ -11,35 +9,22 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
     @Column(unique = true)
     private String email;
-
+    @Column(unique = true)
     private String password;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "system_points_id")
-    private SystemPointsEntity systemPoints;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AccountEntity> accounts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NotificationEntity> notifications = new ArrayList<>();
 
     public UserEntity() {}
 
-    public UserEntity(Long id, String name, String email, String password, SystemPointsEntity systemPoints) {
+    public UserEntity(Long id, String name, String email, String password) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.systemPoints = systemPoints;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -69,39 +54,5 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public SystemPointsEntity getSystemPoints() {
-        return systemPoints;
-    }
-
-    public void setSystemPoints(SystemPointsEntity systemPoints) {
-        this.systemPoints = systemPoints;
-    }
-
-    public List<AccountEntity> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(List<AccountEntity> accounts) {
-        this.accounts = accounts;
-    }
-
-    public List<NotificationEntity> getNotifications() {
-        return notifications;
-    }
-
-    public void setNotifications(List<NotificationEntity> notifications) {
-        this.notifications = notifications;
-    }
-
-    public void addNotification(NotificationEntity notification) {
-        notifications.add(notification);
-        notification.setUser(this);
-    }
-
-    public void addAccount(AccountEntity account) {
-        accounts.add(account);
-        account.setUser(this);
     }
 }
