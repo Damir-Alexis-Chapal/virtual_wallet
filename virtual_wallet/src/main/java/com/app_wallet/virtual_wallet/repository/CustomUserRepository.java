@@ -14,15 +14,21 @@ import java.util.stream.Collectors;
 public class CustomUserRepository {
 
     @Autowired
-    private UserRepository userRepository; // Usamos la interfaz de JPA
+    private UserRepository userRepository;
 
     @Autowired
     private UserMapper userMapper;
 
+    // Guarda usando DTO (ya existe)
     public UserDTO save(UserDTO userDTO) {
         UserEntity entity = userMapper.dtoToEntity(userDTO);
         UserEntity savedEntity = userRepository.save(entity);
         return userMapper.entityToDto(savedEntity);
+    }
+
+    // Guarda usando Entity directamente (NUEVO, opcional)
+    public UserEntity saveEntity(UserEntity entity) {
+        return userRepository.save(entity);
     }
 
     public Optional<UserDTO> findDtoById(Long id) {
@@ -48,4 +54,5 @@ public class CustomUserRepository {
     }
 
 }
+
 
