@@ -9,15 +9,19 @@ public class TransactionDTO {
     private String type;
     private LocalDateTime date;
     private String description;
+    private Long origin;
+    private String destination;
 
     public TransactionDTO() {}
 
-    public TransactionDTO(Long id, BigDecimal amount, String type, LocalDateTime date, String description) {
+    public TransactionDTO(Long id, BigDecimal amount, String type, LocalDateTime date, String description, Long origin, String destination) {
         this.id = id;
         this.amount = amount;
         this.type = type;
         this.date = date;
         this.description = description;
+        this.origin = origin;
+        this.destination = destination;
     }
 
     public Long getId() { return id; }
@@ -34,4 +38,10 @@ public class TransactionDTO {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public Long getOrigin() { return origin; }
+    public void setOrigin(Long origin) { this.origin = origin; }
+
+    public String getDestination() { return destination; }
+    public void setDestination(String destination) { this.destination = destination; }
 }

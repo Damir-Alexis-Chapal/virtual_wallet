@@ -22,25 +22,25 @@ public class TransactionEntity {
     private LocalDateTime date;
 
     @Column(name = "Origin")
-    private Long accountOrigin;
+    private Long accountOrigin; //CUENTA BANCARIA DESDE DONDE SE ENVIA, SE TOMA EL ID
 
     @Column(name = "destiny")
-    private Long accountDestiny;
+    private String userDestiny; //
 
     private String description;
 
     @Column(name = "user_id")
-    private Long userId;
+    private Long userId;//PARA IDENTIFICAR LAS TRANSACCIONES CON EL USUARIO QUE LAS ENVIA
 
     public TransactionEntity() {}
 
-    public TransactionEntity(Long id, BigDecimal amount, String type, LocalDateTime date, Long accountOrigin, Long accountDestiny, String description, Long userId ) {
+    public TransactionEntity(Long id, BigDecimal amount, String type, LocalDateTime date, Long accountOrigin, String userDestiny, String description, Long userId ) {
         this.id = id;
         this.amount = amount;
         this.type = type;
         this.date = date;
         this.accountOrigin = accountOrigin;
-        this.accountDestiny = accountDestiny;
+        this.userDestiny = userDestiny;
         this.description = description;
         this.userId = userId;
 
@@ -86,12 +86,12 @@ public class TransactionEntity {
         this.accountOrigin = accountOrigin;
     }
 
-    public Long getAccountDestiny() {
-        return accountDestiny;
+    public String getUserDestiny() {
+        return userDestiny;
     }
 
-    public void setAccountDestiny(Long accountDestiny) {
-        this.accountDestiny = accountDestiny;
+    public void setUserDestiny(String userDestiny) {
+        this.userDestiny = userDestiny;
     }
 
     public String getDescription() {
