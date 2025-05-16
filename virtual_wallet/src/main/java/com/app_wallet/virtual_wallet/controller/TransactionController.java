@@ -5,9 +5,12 @@ import com.app_wallet.virtual_wallet.dto.UserDTO;
 import com.app_wallet.virtual_wallet.service.TransactionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,34 +19,53 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final HttpSession session;
 
     @Autowired
-    public TransactionController(TransactionService transactionService, HttpSession session) {
+    public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
-        this.session = session;
     }
-    @GetMapping("/recent")
-    @ResponseBody
-    public List<TransactionDTO> recent() {
+
+    @PostMapping("/send")
+    public ResponseEntity<?> sendTransaction(
+            @RequestParam String email,
+            @RequestParam BigDecimal amount,
+            @RequestParam String description,
+            HttpSession session
+    ) {
         UserDTO user = (UserDTO) session.getAttribute("user");
         if (user == null) {
-            return Collections.emptyList();
+            return ResponseEntity.status(401).body("Unauthorized");
         }
-        return transactionService
-                .getRecentTransactions(user.getId())
-                .toJavaList();
+
+        TransactionDTO dto = new TransactionDTO();
+        dto.setAmount(amount);
+        dto.setDescription(description);
+        dto.setType("TRANSFER");
+        dto.setDate(LocalDateTime.now());
+        dto.setDestination(email);
+
+        Long accountOriginId = 1L;
+
+        transactionService.saveTransaction(dto, user.getId(), accountOriginId); // <- Esto va al service
+
+        return ResponseEntity.ok("Transaction saved successfully.");
+    }
+
+    @GetMapping("/recent")
+    @ResponseBody
+    public List<TransactionDTO> recent(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        return (user == null)
+                ? Collections.emptyList()
+                : transactionService.getRecentTransactions(user.getId()).toJavaList();
     }
 
     @GetMapping("/all")
     @ResponseBody
-    public List<TransactionDTO> all() {
+    public List<TransactionDTO> all(HttpSession session) {
         UserDTO user = (UserDTO) session.getAttribute("user");
-        if (user == null) {
-            return Collections.emptyList();
-        }
-        return transactionService
-                .getAllTransactions(user.getId())
-                .toJavaList();
+        return (user == null)
+                ? Collections.emptyList()
+                : transactionService.getAllTransactions(user.getId()).toJavaList();
     }
 }

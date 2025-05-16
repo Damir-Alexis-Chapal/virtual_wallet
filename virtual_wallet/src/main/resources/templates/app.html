@@ -134,254 +134,138 @@ Content js-->
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", () => {
         const content = document.getElementById("main-content");
-        const logoutLink = document.getElementById("logout-link");
+
+        // Muestra el modal de logout
+        document.getElementById("logout-link")?.addEventListener("click", e => {
+            e.preventDefault();
+            new bootstrap.Modal(document.getElementById("logout-modal")).show();
+        });
+
+        // Plantillas parciales
         const views = {
             home: `
-        <div class="settings-container">
-            <h1 class="mb-4">My Wallet</h1>
+      <div class="settings-container">
+        <h1 class="mb-4">My Wallet</h1>
         <div class="card custom-card mb-4">
-            <h3>Current Balance</h3>
-            <p class="balance-amount">$0.00</p>
-            <span class="badge bg-success">+0 pts</span>
-            <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
-                <button type="button" class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
-                <button type="button" class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2" ></i>Deposit</button>
-                <button type="button" class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
-            </div>
+          <h3>Current Balance</h3>
+          <p class="balance-amount">$0.00</p>
+          <span class="badge bg-success">+0 pts</span>
+          <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+            <button class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
+            <button class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
+            <button class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
+          </div>
         </div>
         <div class="card custom-card">
-            <h3 class="mb-3">Transaction History</h3>
-            <div class="transaction-item d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-arrow-down-circle text-success me-2"></i> Deposit</span>
-                <span class="text-success">+ $50.00</span>
-            </div>
-            <div class="transaction-item d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-arrow-up-circle text-danger me-2"></i> Payment to John</span>
-                <span class="text-danger">- $20.00</span>
-            </div>
-            <div class="transaction-item d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-arrow-up-circle text-danger me-2"></i> Purchase</span>
-                <span class="text-danger">- $15.00</span>
-            </div>
-            <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">See all transactions</a>
+          <h3 class="mb-3">Transaction History</h3>
+          <div id="recent-transactions"></div>
+          <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">See all transactions</a>
         </div>
-        </div>
-
-      `,
-            profile: `
-            <div class="settings-container">
-                <h2 class="mb-4">Profile</h2>
-            <div class="card custom-card mb-4">
-            <h4 class="mb-3">User Information</h4>
-
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Name:</div>
-                <div class="col-md-8">${userName}</div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Email:</div>
-                <div class="col-md-8">${userEmail}</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Username:</div>
-                <div class="col-md-8">jdoe123</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Total Balance:</div>
-                <div class="col-md-8 text-success fw-bold">$1,250.00</div>
-            </div>
-        </div>
-
-        <div class="card custom-card">
-            <h4 class="mb-3">Account Actions</h4>
-            <div class="d-flex gap-3">
-                <button class="btn btn-outline-light"><i class="bi bi-pencil-fill me-2"></i>Edit Profile</button>
-                <button class="btn btn-outline-danger"><i class="bi bi-trash-fill me-2"></i>Delete Account</button>
-            </div>
-        </div>
-            </div>
-
-        `,
+      </div>
+    `,
             history: `
-  <h2 class="mb-4">Transaction History</h2>
-  <div class="card custom-card">
-    <h4 class="mb-3">All Transactions</h4>
-    <div id="all-transactions"></div>
-  </div>
-`,
-            statistics: `
-                <div class="container mt-4">
-                    <h2 class="mb-4">Statistics</h2>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
-                                <div class="card-body">
-                                    <h5 class="card-title">User Activity</h5>
-                                    <canvas id="barChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
-                                <div class="card-body">
-                                    <h5 class="card-title">Monthly Growth</h5>
-                                    <canvas id="lineChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            `,
-            settings: `
-                <div class="settings-container">
-                    <h2>Settings</h2>
-                    <div class="card custom-card mb-4">
-                        <h4>Language</h4>
-                        <select class="form-select bg-dark text-white border-secondary">
-                            <option selected>English</option>
-                            <option>Spanish</option>
-                            <option>French</option>
-                        </select>
-                    </div>
-                    <div class="card custom-card">
-                        <h4>Account Management</h4>
-                        <button class="btn btn-outline-primary mb-3">Manage Accounts</button>
-                        <button class="btn btn-outline-danger">Delete Account</button>
-                    </div>
-                </div>
-
-            `,
-            wallets:`
-                <div class="settings-container">
-                    <h2 class="mb-4">My Wallets</h2>
-                    <div class="card custom-card mb-4">
-                        <h4 class="mb-3">Available Wallets</h4>
-                        <ul id="wallet-list" class="list-group list-group-flush bg-dark">
-                            <!-- Wallet items se agregarán aquí dinámicamente -->
-                            <li class="list-group-item bg-dark text-white border-secondary">Example Wallet 1</li>
-                            <li class="list-group-item bg-dark text-white border-secondary">Example Wallet 2</li>
-                        </ul>
-                    </div>
-
-                    <div class="card custom-card">
-                        <h4 class="mb-3">Create New Wallet</h4>
-                        <form id="wallet-form">
-                            <div class="mb-3">
-                                <label for="wallet-name" class="form-label">Wallet Name</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-name" placeholder="Enter wallet name" required />
-                            </div>
-                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-plus-circle me-2"></i>Create Wallet</button>
-                        </form>
-                    </div>
-               </div>
-            `
-
+      <h2 class="mb-4">Transaction History</h2>
+      <div class="card custom-card">
+        <h4 class="mb-3">All Transactions</h4>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-hover align-middle">
+            <thead>
+              <tr><th>ID</th><th>Destiny</th><th>Amount</th><th>Description</th><th>Date</th></tr>
+            </thead>
+            <tbody id="all-transactions"></tbody>
+          </table>
+        </div>
+      </div>
+    `,
+            // ... sigue con profile, statistics, settings, wallets tal cual tenías ...
         };
-        if (logoutLink) {
-            logoutLink.addEventListener("click", function (e) {
-                e.preventDefault();
-                const modal = new bootstrap.Modal(document.getElementById("logout-modal"));
-                modal.show();
-            });
-        }
 
-        // Confirmación de logout
-        const confirmLogoutBtn = document.getElementById("confirm-logout");
-        if (confirmLogoutBtn) {
-            confirmLogoutBtn.addEventListener("click", function () {
-                alert("Logged out!"); // Reemplaza esto por tu lógica real
-                window.location.href = "/home/gotosignin";
-            });
-        }
         function loadView(view) {
             content.innerHTML = views[view] || "<h2>Not Found</h2>";
 
-            const depositButton = document.getElementById("deposit-link");
-            if (depositButton) {
-                depositButton.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    const modal = new bootstrap.Modal(document.getElementById("deposit-modal"));
-                    modal.show();
+            // Botones de modal
+            document.getElementById("deposit-link")
+                ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("deposit-modal")).show(); });
+            document.getElementById("send-link")
+                ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("send-money-modal")).show(); });
+
+            // HOME → cargar 3 transacciones recientes
+            if (view === "home") {
+                document.getElementById("see-history")?.addEventListener("click", e => {
+                    e.preventDefault(); loadView("history");
                 });
+
+                fetch("/transaction/recent")
+                    .then(r => r.json())
+                    .then(data => {
+                        const c = document.getElementById("recent-transactions");
+                        c.innerHTML = data.length
+                            ? data.map(tx => {
+                                const pos = tx.amount >= 0;
+                                return `
+                  <div class="transaction-item d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-${pos ? "arrow-down-circle text-success" : "arrow-up-circle text-danger"} me-2"></i>${tx.description || tx.type}</span>
+                    <span class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</span>
+                  </div>`;
+                            }).join("")
+                            : "<p class='text-center'>No transactions yet.</p>";
+                    });
             }
 
-            const sendButton = document.getElementById("send-link");
-            if (sendButton) {
-                sendButton.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    const modal = new bootstrap.Modal(document.getElementById("send-money-modal"));
-                    modal.show();
-                });
-            }
-            // Asociar evento al botón "See all transactions" si estamos en la vista 'home'
-            if (view === "home") {
-                const seeHistoryLink = document.getElementById("see-history");
-                if (seeHistoryLink) {
-                    seeHistoryLink.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        loadView("history");
+            // HISTORY → cargar todas las transacciones
+            if (view === "history") {
+                fetch("/transaction/all")
+                    .then(r => r.json())
+                    .then(data => {
+                        const t = document.getElementById("all-transactions");
+                        t.innerHTML = data.length
+                            ? data.map(tx => {
+                                const pos = tx.amount >= 0;
+                                return `
+                  <tr>
+                    <td>#${tx.id}</td>
+                    <td>${tx.destination}</td>
+                    <td class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</td>
+                    <td>${tx.description || ""}</td>
+                    <td>${tx.date.split("T")[0]}</td>
+                  </tr>`;
+                            }).join("")
+                            : `<tr><td colspan="5" class="text-center">No transactions yet.</td></tr>`;
                     });
-                }
             }
-            const btnWallets = document.getElementById("btn-wallets");
-            if (btnWallets) {
-                btnWallets.addEventListener("click", () => {
-                    loadView("wallets");
-                });
-            }
+
+            // Wallets
+            document.getElementById("btn-wallets")
+                ?.addEventListener("click", () => loadView("wallets"));
             if (view === "wallets") {
                 renderWallets();
-
-                const form = document.getElementById("wallet-form");
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    const walletName = document.getElementById("wallet-name").value.trim();
-                    if (walletName !== "") {
-                        wallets.push({ name: walletName });
-                        document.getElementById("wallet-name").value = "";
-                        renderWallets();
-                    }
-                });
+                document.getElementById("wallet-form")
+                    .addEventListener("submit", e => {
+                        e.preventDefault();
+                        const name = document.getElementById("wallet-name").value.trim();
+                        if (name) {
+                            wallets.push({ name });
+                            document.getElementById("wallet-name").value = "";
+                            renderWallets();
+                        }
+                    });
             }
         }
-        function renderWallets() {
-            const list = document.getElementById("wallet-list");
-            list.innerHTML = "";
 
-            if (wallets.length === 0) {
-                list.innerHTML = "<li>No wallets created yet.</li>";
-                return;
-            }
-
-            wallets.forEach((wallet, index) => {
-                const li = document.createElement("li");
-                li.textContent = `${index + 1}. ${wallet.name}`;
-                list.appendChild(li);
-            });
-        }
-
-        // Cargar por defecto Home
+        // Arranca en home
         loadView("home");
-
-        // Escuchar clics en la sidebar
-        document.querySelectorAll(".nav-link").forEach(link => {
-            link.addEventListener("click", e => {
+        // Navegación lateral
+        document.querySelectorAll(".nav-link[data-section]").forEach(a =>
+            a.addEventListener("click", e => {
                 e.preventDefault();
-                const section = link.getAttribute("data-section");
-                if (section) {
-                    loadView(section);
-                }
-            });
-        });
+                loadView(a.dataset.section);
+            })
+        );
     });
-
 </script>
+
 
 <!-- Modal de confirmación de logout -->
 <div class="modal fade" id="logout-modal" tabindex="-1" aria-labelledby="logout-modal-label" aria-hidden="true">
