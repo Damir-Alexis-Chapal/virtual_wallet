@@ -105,7 +105,7 @@
             <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
                 <button type="button" class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
                 <button type="button" class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
-                <button type="button" class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
+                <button type="button" class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
             </div>
         </div>
 
@@ -148,7 +148,7 @@ Content js-->
             <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
                 <button type="button" class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
                 <button type="button" class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2" ></i>Deposit</button>
-                <button type="button" class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
+                <button type="button" class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
             </div>
         </div>
         <div class="card custom-card">
@@ -206,12 +206,12 @@ Content js-->
 
         `,
             history: `
-  <h2 class="mb-4">Transaction History</h2>
-  <div class="card custom-card">
-    <h4 class="mb-3">All Transactions</h4>
-    <div id="all-transactions"></div>
-  </div>
-`,
+              <h2 class="mb-4">Transaction History</h2>
+              <div class="card custom-card">
+                <h4 class="mb-3">All Transactions</h4>
+                <div id="all-transactions"></div>
+              </div>
+            `,
             statistics: `
                 <div class="container mt-4">
                     <h2 class="mb-4">Statistics</h2>
@@ -257,12 +257,12 @@ Content js-->
                 </div>
 
             `,
-            wallets:`
+            bank_accounts:`
                 <div class="settings-container">
                     <h2 class="mb-4">My Wallets</h2>
                     <div class="card custom-card mb-4">
                         <h4 class="mb-3">Available Wallets</h4>
-                        <ul id="wallet-list" class="list-group list-group-flush bg-dark">
+                        <ul id="bank-accounts-list" class="list-group list-group-flush bg-dark">
                             <!-- Wallet items se agregarán aquí dinámicamente -->
                             <li class="list-group-item bg-dark text-white border-secondary">Example Wallet 1</li>
                             <li class="list-group-item bg-dark text-white border-secondary">Example Wallet 2</li>
@@ -329,33 +329,33 @@ Content js-->
                     });
                 }
             }
-            const btnWallets = document.getElementById("btn-wallets");
-            if (btnWallets) {
-                btnWallets.addEventListener("click", () => {
-                    loadView("wallets");
+            const btnBankAcc = document.getElementById("btn-bank-accounts");
+            if (btnBankAcc) {
+                btnBankAcc.addEventListener("click", () => {
+                    loadView("bank_accounts");
                 });
             }
-            if (view === "wallets") {
-                renderWallets();
+            if (view === "bank_accounts") {
+                renderBankAcc();
 
                 const form = document.getElementById("wallet-form");
                 form.addEventListener("submit", function (e) {
                     e.preventDefault();
                     const walletName = document.getElementById("wallet-name").value.trim();
                     if (walletName !== "") {
-                        wallets.push({ name: walletName });
+                        bank_accounts.push({ name: walletName });
                         document.getElementById("wallet-name").value = "";
-                        renderWallets();
+                        renderBankAcc();
                     }
                 });
             }
         }
-        function renderWallets() {
-            const list = document.getElementById("wallet-list");
+        function renderBankAcc() {
+            const list = document.getElementById("bank-accounts-list");
             list.innerHTML = "";
 
             if (wallets.length === 0) {
-                list.innerHTML = "<li>No wallets created yet.</li>";
+                list.innerHTML = "<li>No bank accounts added yet.</li>";
                 return;
             }
 
@@ -411,8 +411,8 @@ Content js-->
                 <button type="button" class="btn-close" style="filter: invert(1);" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="send-form" action="/transaction/send" method="POST">
-            <div class="modal-body">
-                <p>Make sure you enter the data correctly</p>
+                <div class="modal-body">
+                    <p>Make sure you enter the data correctly</p>
                     <div class="mb-3">
                         <label for="inputEmail1" class="form-label">Destiny email</label>
                         <input type="email" class="form-control bg-dark text-white border-secondary" id="inputEmail1" name="email" required>
@@ -435,11 +435,11 @@ Content js-->
                         <label for="inputDescription" class="form-label">Description</label>
                         <input type="text" class="form-control bg-dark text-white border-secondary" id="inputDescription" name="description">
                     </div>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #444;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-success">Send</button>
-            </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #444;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Send</button>
+                </div>
             </form>
         </div>
     </div>
