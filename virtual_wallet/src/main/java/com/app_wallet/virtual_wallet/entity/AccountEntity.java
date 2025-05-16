@@ -18,14 +18,17 @@ public class AccountEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(nullable = false, unique=true)
+    private Long accountNumber;
 
     public AccountEntity() {
     }
 
-    public AccountEntity(Long id, BigDecimal balance, Long userId) {
+    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber) {
         this.id = id;
         this.balance = balance;
         this.userId = userId;
+        this.accountNumber = accountNumber;
 
     }
 
@@ -48,8 +51,13 @@ public class AccountEntity {
     public Long getUserId() {
         return userId;
     }
-
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+    public Long getAccountNumber() {
+        return accountNumber;
+    }
+    public void setAccountNumber(Long accountNumber) {
+        this.accountNumber = accountNumber;
     }
 }

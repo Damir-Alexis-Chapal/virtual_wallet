@@ -71,6 +71,8 @@
 </head>
 <body>
 
+
+
 <!-- Sidebar -->
 <div class="sidebar custom-sidebar">
     <h4 class="text-center">VW</h4>
@@ -105,7 +107,7 @@
             <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
                 <button type="button" class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
                 <button type="button" class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
-                <button type="button" class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
+                <button type="button" class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
             </div>
         </div>
 
@@ -126,24 +128,54 @@
 ////////////
 ///////////
 Content js-->
-
 <script th:inline="javascript">
+    /*<![CDATA[*/
 
     const userName = /*[[${user.name}]]*/ "Desconocido";
     const userEmail = /*[[${user.email}]]*/ "Sin email";
+
+
+    const user = /*[[${user}]]*/ null;
+
+    console.log("User:", user);
+
+
+    /*]]>*/
 </script>
 
 <script>
+    let cuentas = [];
+
+    // Función para obtener las cuentas del backend
+    async function getAccounts() {
+        try {
+            const response = await fetch("/users/getAccounts", {
+                method: "POST"
+            });
+            if (!response.ok) {
+                throw new Error("Error al obtener las cuentas");
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error:", error);
+            return [];
+        }
+    }
+
+    async function init() {
+        cuentas = await getAccounts();
+
+    }
+
+
+    init();
     document.addEventListener("DOMContentLoaded", () => {
+
         const content = document.getElementById("main-content");
+        const logoutLink = document.getElementById("logout-link");
 
-        // Muestra el modal de logout
-        document.getElementById("logout-link")?.addEventListener("click", e => {
-            e.preventDefault();
-            new bootstrap.Modal(document.getElementById("logout-modal")).show();
-        });
 
-        // Plantillas parciales
         const views = {
             home: `
       <div class="settings-container">
@@ -155,7 +187,7 @@ Content js-->
           <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
             <button class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
             <button class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
-            <button class="btn btn-info px-4" id="btn-wallets"><i class="bi bi-credit-card-2-front-fill me-2"></i>Wallets</button>
+            <button class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
           </div>
         </div>
         <div class="card custom-card">
@@ -165,6 +197,41 @@ Content js-->
         </div>
       </div>
     `,
+            profile: `
+            <div class="settings-container">
+                <h2 class="mb-4">Profile</h2>
+            <div class="card custom-card mb-4">
+            <h4 class="mb-3">User Information</h4>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Name:</div>
+                <div class="col-md-8">${userName}</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Email:</div>
+                <div class="col-md-8">${userEmail}</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Username:</div>
+                <div class="col-md-8">jdoe123</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Total Balance:</div>
+                <div class="col-md-8 text-success fw-bold">$1,250.00</div>
+            </div>
+        </div>
+
+        <div class="card custom-card">
+            <h4 class="mb-3">Account Actions</h4>
+            <div class="d-flex gap-3">
+                <button class="btn btn-outline-light"><i class="bi bi-pencil-fill me-2"></i>Edit Profile</button>
+                <button class="btn btn-outline-danger"><i class="bi bi-trash-fill me-2"></i>Delete Account</button>
+            </div>
+        </div>
+            </div>
+
+        `,
             history: `
       <h2 class="mb-4">Transaction History</h2>
       <div class="card custom-card">
@@ -178,9 +245,101 @@ Content js-->
           </table>
         </div>
       </div>
-    `,
-            // ... sigue con profile, statistics, settings, wallets tal cual tenías ...
+    `,statistics: `
+                <div class="container mt-4">
+                    <h2 class="mb-4">Statistics</h2>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
+                                <div class="card-body">
+                                    <h5 class="card-title">User Activity</h5>
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
+                                <div class="card-body">
+                                    <h5 class="card-title">Monthly Growth</h5>
+                                    <canvas id="lineChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            `,
+            settings: `
+                <div class="settings-container">
+                    <h2>Settings</h2>
+                    <div class="card custom-card mb-4">
+                        <h4>Language</h4>
+                        <select class="form-select bg-dark text-white border-secondary">
+                            <option selected>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                        </select>
+                    </div>
+                    <div class="card custom-card">
+                        <h4>Account Management</h4>
+                        <button class="btn btn-outline-primary mb-3">Manage Accounts</button>
+                        <button class="btn btn-outline-danger">Delete Account</button>
+                    </div>
+                </div>
+
+            `,
+            bank_accounts:`
+                <div class="settings-container">
+                    <h2 class="mb-4">Bank Accounts</h2>
+
+                    <div class="card custom-card mb-4">
+                        <h4 class="mb-3">Available Accounts</h4>
+                        <ul id="bank-accounts-list" class="list-group list-group-flush bg-dark">
+
+                        </ul>
+                    </div>
+
+                    <form id="account-form" action="/Accounts/add" method="POST">
+                        <div class="card custom-card">
+                            <h4 class="mb-3">Add account</h4>
+                            <div class="mb-3">
+                                <label for="account-number" class="form-label">Number Account</label>
+                                <input
+                                    type="number"
+                                    class="form-control bg-dark text-white border-secondary"
+                                    id="account-number"
+                                    name="accountNumber"
+                                />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `
+
         };
+
+
+        if (logoutLink) {
+            logoutLink.addEventListener("click", function (e) {
+                e.preventDefault();
+                const modal = new bootstrap.Modal(document.getElementById("logout-modal"));
+                modal.show();
+            });
+        }
+
+        // Confirmación de logout
+        const confirmLogoutBtn = document.getElementById("confirm-logout");
+        if (confirmLogoutBtn) {
+            confirmLogoutBtn.addEventListener("click", function () {
+                alert("Logged out!"); // Reemplaza esto por tu lógica real
+                window.location.href = "/home/gotosignin";
+            });
+        }
 
         function loadView(view) {
             content.innerHTML = views[view] || "<h2>Not Found</h2>";
@@ -191,6 +350,12 @@ Content js-->
             document.getElementById("send-link")
                 ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("send-money-modal")).show(); });
 
+            document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
+                e.preventDefault();
+                loadView("bank_accounts");
+
+            });
+
             // HOME → cargar 3 transacciones recientes
             if (view === "home") {
                 document.getElementById("see-history")?.addEventListener("click", e => {
@@ -200,6 +365,7 @@ Content js-->
                 fetch("/transaction/recent")
                     .then(r => r.json())
                     .then(data => {
+
                         const c = document.getElementById("recent-transactions");
                         c.innerHTML = data.length
                             ? data.map(tx => {
@@ -236,22 +402,34 @@ Content js-->
                     });
             }
 
-            // Wallets
-            document.getElementById("btn-wallets")
-                ?.addEventListener("click", () => loadView("wallets"));
-            if (view === "wallets") {
-                renderWallets();
-                document.getElementById("wallet-form")
-                    .addEventListener("submit", e => {
-                        e.preventDefault();
-                        const name = document.getElementById("wallet-name").value.trim();
-                        if (name) {
-                            wallets.push({ name });
-                            document.getElementById("wallet-name").value = "";
-                            renderWallets();
-                        }
+
+            //para cargar las cuentas
+            if (view === "bank_accounts" || view === "home") {
+                fetch("/users/getAccounts", {
+                    method: "POST"
+                })
+                    .then(r => r.json())
+                    .then(data => {
+
+                        const list = document.getElementById("bank-accounts-list");
+                        list.innerHTML = data.length
+                            ? data.map(account => `
+                    <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Account #${account.id}</strong><br>
+                            Number: ${account.accountNumber}
+                        </div>
+                        <span class="badge bg-primary rounded-pill">$${account.balance.toFixed(2)}</span>
+                    </li>
+                `).join("")
+                            : `<li class="list-group-item bg-dark text-light text-center">No accounts yet.</li>`;
                     });
             }
+
+
+
+
+
         }
 
         // Arranca en home
@@ -264,6 +442,7 @@ Content js-->
             })
         );
     });
+
 </script>
 
 
@@ -441,6 +620,8 @@ Content js-->
         }
     });
 </script>
+
+
 
 <!-- Chart.js CDN  -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
