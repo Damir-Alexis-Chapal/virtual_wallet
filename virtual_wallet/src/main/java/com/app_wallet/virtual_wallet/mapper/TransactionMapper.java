@@ -16,4 +16,19 @@ public class TransactionMapper {
         entity.setUserId(userId);
         return entity;
     }
+
+    public static TransactionDTO toDTO(TransactionEntity entity) {
+        if (entity == null) return null;
+
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(entity.getId());
+        dto.setAmount(entity.getAmount());
+        dto.setType(entity.getType());
+        dto.setDate(entity.getDate());
+        dto.setDescription(entity.getDescription());
+        dto.setOrigin(entity.getAccountOrigin());
+        dto.setDestination(entity.getUserDestiny());
+
+        return dto;
+    }
 }

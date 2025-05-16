@@ -1,6 +1,8 @@
 package com.app_wallet.virtual_wallet.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class LinkedList<T> implements Iterable<T> {
@@ -141,4 +143,21 @@ public class LinkedList<T> implements Iterable<T> {
         };
     }
 
+    public List<T> toJavaList() {
+        List<T> list = new ArrayList<>();
+        Node<T> current = head;
+        while (current != null) {
+            list.add(current.getData());
+            current = current.getNext();
+        }
+        return list;
+    }
+    
+    public static <T> LinkedList<T> fromJavaList(List<T> javaList) {
+        LinkedList<T> custom = new LinkedList<>();
+        for (T item : javaList) {
+            custom.addTail(item); 
+        }
+        return custom;
+    }
 }

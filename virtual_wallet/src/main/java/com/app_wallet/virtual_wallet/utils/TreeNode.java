@@ -1,37 +1,37 @@
 package com.app_wallet.virtual_wallet.utils;
 
-public class TreeNode {
-    public int data;
-    public TreeNode left;
-    public TreeNode right;
+public class TreeNode<T extends Comparable<T>> {
+    public T data;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
 
-    public TreeNode(int data) {
+    public TreeNode(T data) {
         this.data = data;
         this.left = null;
         this.right = null;
     }
 
-    public int getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(int data) {
+    public void setData(T data) {
         this.data = data;
     }
 
-    public TreeNode getLeft() {
+    public TreeNode<T> getLeft() {
         return left;
     }
 
-    public void setLeft(TreeNode left) {
+    public void setLeft(TreeNode<T> left) {
         this.left = left;
     }
 
-    public TreeNode getRight() {
+    public TreeNode<T> getRight() {
         return right;
     }
 
-    public void setRight(TreeNode right) {
+    public void setRight(TreeNode<T> right) {
         this.right = right;
     }
 }
