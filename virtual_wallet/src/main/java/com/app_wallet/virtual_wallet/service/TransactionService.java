@@ -8,6 +8,7 @@ import com.app_wallet.virtual_wallet.utils.LinkedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -21,7 +22,10 @@ public class TransactionService {
     }
 
     public void saveTransaction(TransactionDTO dto, Long userId, Long accountOriginId) {
+        BigDecimal amount = dto.getAmount();
+
         TransactionEntity entity = TransactionMapper.toEntity(dto, userId, accountOriginId);
+
         transactionRepository.save(entity);
     }
 

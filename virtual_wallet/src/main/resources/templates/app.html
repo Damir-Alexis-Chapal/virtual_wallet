@@ -310,8 +310,9 @@ Content js-->
                                     type="number"
                                     class="form-control bg-dark text-white border-secondary"
                                     id="account-number"
-                                    name="accountNumber"
+                                    name="accountNumber" required
                                 />
+
                             </div>
                             <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-plus-circle me-2"></i>Add
@@ -347,8 +348,43 @@ Content js-->
             // Botones de modal
             document.getElementById("deposit-link")
                 ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("deposit-modal")).show(); });
-            document.getElementById("send-link")
-                ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("send-money-modal")).show(); });
+            document.getElementById("send-link")?.addEventListener("click", async (e) => {
+                e.preventDefault();
+
+
+                // Mostrar el modal
+                const modalElement = document.getElementById("send-money-modal");
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                // Limpiar opciones anteriores
+                const select = document.getElementById("selectPurse");
+                select.innerHTML = '<option value="">-- Select an account --</option>';
+
+                try {
+                    const response = await fetch("/users/getAccounts", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" }
+                    });
+
+                    if (!response.ok) throw new Error("Error fetching accounts");
+
+                    const accounts = await response.json();
+
+                    accounts.forEach(account => {
+                        const option = document.createElement("option");
+                        option.value = account.id;
+                        option.textContent = `Account ${account.id} - $${account.balance}`;
+                        select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error("Error loading accounts:", error);
+                    const errorOption = document.createElement("option");
+                    errorOption.disabled = true;
+                    errorOption.textContent = "Error loading accounts";
+                    select.appendChild(errorOption);
+                }
+            });
 
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
                 e.preventDefault();
@@ -476,17 +512,15 @@ Content js-->
             <form id="send-form" action="/transaction/send" method="POST">
             <div class="modal-body">
                 <p>Make sure you enter the data correctly</p>
+                <div id="form-error" class="text-danger mb-2" style="display: none;"></div>
                     <div class="mb-3">
-                        <label for="inputEmail1" class="form-label">Destiny email</label>
-                        <input type="email" class="form-control bg-dark text-white border-secondary" id="inputEmail1" name="email" required>
+                        <label for="inputDestinyAccount" class="form-label">Destiny Number Account</label>
+                        <input type="number" class="form-control bg-dark text-white border-secondary" id="inputDestinyAccount" name="accountNumber" required>
                     </div>
                     <div class="mb-3">
-                        <label for="selectPurse" class="form-label">Send from wallet</label>
-                        <select id="selectPurse" class="form-select bg-dark text-white border-secondary">
-                            <option selected>--</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
+                        <label for="selectPurse" class="form-label">Send from account</label>
+                        <select id="selectPurse" name="accountOriginId" class="form-select bg-dark text-white border-secondary">
+                            <option value="" disabled selected>Select an account</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -620,6 +654,23 @@ Content js-->
         }
     });
 </script>
+<script>
+    document.getElementById('send-form').addEventListener('submit', function(event) {
+        const select = document.getElementById('selectPurse');
+        const errorDiv = document.getElementById('form-error');
+
+        if (!select.value) {
+            event.preventDefault();
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = 'Please select an account to send from.';
+        } else {
+            errorDiv.style.display = 'none'; // Oculta el error si todo está bien
+        }
+    });
+</script>
+
+
+
 
 
 
