@@ -15,6 +15,9 @@ public class UserEntity {
     @Column(unique = true)
     private String password;
 
+    @OneToOne(mappedBy = "user")
+    private SystemPointsEntity points;
+
     public UserEntity() {}
 
     public UserEntity(Long id, String name, String email, String password) {

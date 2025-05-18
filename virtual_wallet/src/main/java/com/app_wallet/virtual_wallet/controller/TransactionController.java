@@ -58,7 +58,6 @@ public class TransactionController {
             return ResponseEntity.status(400).body("Insufficient funds");
         }
 
-
         originAccount.setBalance(originAccount.getBalance().subtract(amount));
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
 
