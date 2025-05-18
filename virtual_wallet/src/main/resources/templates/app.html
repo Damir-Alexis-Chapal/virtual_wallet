@@ -246,31 +246,43 @@ Content js-->
         </div>
       </div>
     `,statistics: `
-                <div class="container mt-4">
-                    <h2 class="mb-4">Statistics</h2>
+  <div class="container mt-4">
+    <h2 class="mb-4">Statistics</h2>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
-                                <div class="card-body">
-                                    <h5 class="card-title">User Activity</h5>
-                                    <canvas id="barChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+    <div class="row">
+      <!-- User Activity -->
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <h5 class="card-title">User Activity</h5>
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+      </div>
 
-                        <div class="col-md-6 mb-4">
-                            <div class="card custom-card" style="background-color: #2b2f38; color: white;">
-                                <div class="card-body">
-                                    <h5 class="card-title">Monthly Growth</h5>
-                                    <canvas id="lineChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <!-- Monthly Growth -->
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <h5 class="card-title">Monthly Growth</h5>
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+      </div>
 
-            `,
+      <!-- New: By Category -->
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <h5 class="card-title">By Category</h5>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`,
+
             settings: `
                 <div class="settings-container">
                     <h2>Settings</h2>
@@ -654,6 +666,40 @@ Content js-->
         }
     });
 </script>
+<script>
+    fetch('/transaction/patterns/categories')
+        .then(res => res.json())
+        .then(data => {
+            // data = [{ category: 'FOOD', count: 10 }, … ]
+            const labels = data.map(d => d.category);
+            const counts = data.map(d => d.count);
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => console.error('Error loading category stats:', err));
+</script>
+
 <script>
     document.getElementById('send-form').addEventListener('submit', function(event) {
         const select = document.getElementById('selectPurse');

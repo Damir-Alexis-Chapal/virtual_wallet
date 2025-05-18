@@ -14,6 +14,7 @@ public class TransactionMapper {
         entity.setAccountOrigin(accountOriginId);
         entity.setUserDestiny(dto.getDestination());
         entity.setUserId(userId);
+        entity.setCategory(dto.getCategory());
         return entity;
     }
 
@@ -28,6 +29,7 @@ public class TransactionMapper {
         dto.setDescription(entity.getDescription());
         dto.setOrigin(entity.getAccountOrigin());
         dto.setDestination(entity.getUserDestiny());
+        dto.setCategory(entity.getCategory());
 
         return dto;
     }

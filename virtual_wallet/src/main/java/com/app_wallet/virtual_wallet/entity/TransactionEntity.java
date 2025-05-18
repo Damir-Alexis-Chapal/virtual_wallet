@@ -1,5 +1,6 @@
 package com.app_wallet.virtual_wallet.entity;
 
+import com.app_wallet.virtual_wallet.model.Category;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,6 +32,10 @@ public class TransactionEntity {
 
     @Column(name = "user_id")
     private Long userId;//PARA IDENTIFICAR LAS TRANSACCIONES CON EL USUARIO QUE LAS ENVIA
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Category category;
 
     public TransactionEntity() {}
 
@@ -109,4 +114,7 @@ public class TransactionEntity {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }

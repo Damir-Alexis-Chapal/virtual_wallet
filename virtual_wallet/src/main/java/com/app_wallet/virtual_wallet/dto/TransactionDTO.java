@@ -1,5 +1,7 @@
 package com.app_wallet.virtual_wallet.dto;
 
+import com.app_wallet.virtual_wallet.model.Category;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -11,6 +13,7 @@ public class TransactionDTO {
     private String description;
     private Long origin;
     private String destination;
+    private Category category;
 
     public TransactionDTO() {}
 
@@ -44,4 +47,6 @@ public class TransactionDTO {
 
     public String getDestination() { return destination; }
     public void setDestination(String destination) { this.destination = destination; }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }
