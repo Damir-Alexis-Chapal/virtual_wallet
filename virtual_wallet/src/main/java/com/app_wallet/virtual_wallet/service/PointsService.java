@@ -28,7 +28,7 @@ public class PointsService {
 
     @Transactional
     public void addPointsForTransaction(Long userId, String type, BigDecimal amount) {
-        // 1) Calcular delta
+
         int delta = switch(type) {
             case "DEPOSIT"    -> amount.divide(BigDecimal.valueOf(100)).intValue() * 1;
             case "WITHDRAWAL" -> amount.divide(BigDecimal.valueOf(100)).intValue() * 2;

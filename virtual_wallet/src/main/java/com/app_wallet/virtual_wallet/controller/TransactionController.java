@@ -3,6 +3,7 @@ package com.app_wallet.virtual_wallet.controller;
 import com.app_wallet.virtual_wallet.dto.TransactionDTO;
 import com.app_wallet.virtual_wallet.dto.UserDTO;
 import com.app_wallet.virtual_wallet.entity.AccountEntity;
+import com.app_wallet.virtual_wallet.model.Category;
 import com.app_wallet.virtual_wallet.repository.AccountRepository;
 import com.app_wallet.virtual_wallet.service.AccountService;
 import com.app_wallet.virtual_wallet.service.TransactionService;
@@ -35,6 +36,7 @@ public class TransactionController {
             @RequestParam BigDecimal amount,
             @RequestParam String description,
             @RequestParam Long accountOriginId,
+            @RequestParam String category,
             HttpSession session
     ) {
         UserDTO user = (UserDTO) session.getAttribute("user");
@@ -70,6 +72,8 @@ public class TransactionController {
         dto.setType("TRANSFER");
         dto.setDate(LocalDateTime.now());
         dto.setDestination(String.valueOf(accountNumber));
+        dto.setCategory(Category.valueOf(category));
+
 
         transactionService.saveTransaction(dto, user.getId(), accountOriginId);
 

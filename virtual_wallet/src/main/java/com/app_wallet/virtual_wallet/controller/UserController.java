@@ -2,20 +2,18 @@ package com.app_wallet.virtual_wallet.controller;
 
 import com.app_wallet.virtual_wallet.dto.AccountDTO;
 import com.app_wallet.virtual_wallet.dto.UserDTO;
+
+import com.app_wallet.virtual_wallet.model.Category;
 import com.app_wallet.virtual_wallet.repository.CustomUserRepository;
 import com.app_wallet.virtual_wallet.service.AccountService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/users")
@@ -71,6 +69,16 @@ public class UserController {
         List<AccountDTO> accounts = accountService.getAccountsByUserId(user.getId());
         return ResponseEntity.ok(accounts);
     }
+
+    @PostMapping("/getCategories")
+    public ResponseEntity<List<String>> getCategories() {
+        List<String> categories = Arrays.stream(Category.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(categories);
+    }
+
+
 
 
 
