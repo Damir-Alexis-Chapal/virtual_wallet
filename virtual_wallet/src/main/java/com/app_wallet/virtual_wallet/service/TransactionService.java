@@ -5,28 +5,28 @@ import com.app_wallet.virtual_wallet.entity.TransactionEntity;
 import com.app_wallet.virtual_wallet.mapper.TransactionMapper;
 import com.app_wallet.virtual_wallet.repository.TransactionRepository;
 import com.app_wallet.virtual_wallet.utils.LinkedList;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final PointsService pointsService;
 
-    @Autowired
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository,
+                              PointsService pointsService) {
         this.transactionRepository = transactionRepository;
+        this.pointsService = pointsService;
     }
 
+    @Transactional
     public void saveTransaction(TransactionDTO dto, Long userId, Long accountOriginId) {
-        BigDecimal amount = dto.getAmount();
-
         TransactionEntity entity = TransactionMapper.toEntity(dto, userId, accountOriginId);
-
         transactionRepository.save(entity);
+        pointsService.addPointsForTransaction(userId, dto.getType(), dto.getAmount());
     }
 
     public LinkedList<TransactionDTO> getRecentTransactions(Long userId) {

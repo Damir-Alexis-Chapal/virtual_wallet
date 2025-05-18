@@ -130,33 +130,21 @@
 Content js-->
 <script th:inline="javascript">
     /*<![CDATA[*/
-
     const userName = /*[[${user.name}]]*/ "Desconocido";
     const userEmail = /*[[${user.email}]]*/ "Sin email";
-
-
     const user = /*[[${user}]]*/ null;
-
     console.log("User:", user);
-
-
     /*]]>*/
 </script>
 
 <script>
     let cuentas = [];
 
-    // Función para obtener las cuentas del backend
     async function getAccounts() {
         try {
-            const response = await fetch("/users/getAccounts", {
-                method: "POST"
-            });
-            if (!response.ok) {
-                throw new Error("Error al obtener las cuentas");
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch("/users/getAccounts", { method: "POST" });
+            if (!response.ok) throw new Error("Error al obtener las cuentas");
+            return await response.json();
         } catch (error) {
             console.error("Error:", error);
             return [];
@@ -165,12 +153,10 @@ Content js-->
 
     async function init() {
         cuentas = await getAccounts();
-
     }
 
-
-    init();
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+        await init();
 
         const content = document.getElementById("main-content");
         const logoutLink = document.getElementById("logout-link");
@@ -178,60 +164,117 @@ Content js-->
 
         const views = {
             home: `
-      <div class="settings-container">
-        <h1 class="mb-4">My Wallet</h1>
-        <div class="card custom-card mb-4">
-          <h3>Current Balance</h3>
-          <p class="balance-amount">$0.00</p>
-          <span class="badge bg-success">+0 pts</span>
-          <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
-            <button class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
-            <button class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
-            <button class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
-          </div>
-        </div>
-        <div class="card custom-card">
-          <h3 class="mb-3">Transaction History</h3>
-          <div id="recent-transactions"></div>
-          <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">See all transactions</a>
+    <div class="settings-container">
+      <h1 class="mb-4">My Wallet</h1>
+
+      <!-- Balance Card -->
+      <div class="card custom-card mb-4">
+        <h3>Current Balance</h3>
+        <p class="balance-amount">$0.00</p>
+        <span class="badge bg-success">+0 pts</span>
+        <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+          <button class="btn btn-primary px-4" id="send-link">
+            <i class="bi bi-send-fill me-2"></i>Send
+          </button>
+          <button class="btn btn-success px-4" id="deposit-link">
+            <i class="bi bi-wallet2 me-2"></i>Deposit
+          </button>
+          <button class="btn btn-info px-4" id="btn-bank-accounts">
+            <i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts
+          </button>
         </div>
       </div>
-    `,
+
+      <!-- User Rank Card -->
+      <div class="card custom-card mb-4">
+        <div class="d-flex align-items-center mb-3">
+          <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
+          <h4 class="mb-0">Your Rank</h4>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+          <span id="user-rank-badge" class="badge bg-secondary me-3">Bronce</span>
+          <div class="flex-grow-1">
+            <div class="progress" style="height: .6rem;">
+              <div id="user-rank-progress"
+                   class="progress-bar bg-warning"
+                   role="progressbar"
+                   style="width: 40%;"
+                   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+            <small id="user-rank-text" style="color: white;">400 / 1000 pts</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions History -->
+      <div class="card custom-card">
+        <h3 class="mb-3">Transaction History</h3>
+        <div id="recent-transactions"></div>
+        <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">
+          See all transactions
+        </a>
+      </div>
+    </div>
+  `,
             profile: `
-            <div class="settings-container">
-                <h2 class="mb-4">Profile</h2>
-            <div class="card custom-card mb-4">
-            <h4 class="mb-3">User Information</h4>
+    <div class="settings-container">
+      <h2 class="mb-4">Profile</h2>
 
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Name:</div>
-                <div class="col-md-8">${userName}</div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Email:</div>
-                <div class="col-md-8">${userEmail}</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Username:</div>
-                <div class="col-md-8">jdoe123</div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4 fw-bold">Total Balance:</div>
-                <div class="col-md-8 text-success fw-bold">$1,250.00</div>
-            </div>
+      <!-- User Information -->
+      <div class="card custom-card mb-4">
+        <h4 class="mb-3">User Information</h4>
+        <div class="row mb-3">
+          <div class="col-md-4 fw-bold">Name:</div>
+          <div class="col-md-8">${userName}</div>
         </div>
-
-        <div class="card custom-card">
-            <h4 class="mb-3">Account Actions</h4>
-            <div class="d-flex gap-3">
-                <button class="btn btn-outline-light"><i class="bi bi-pencil-fill me-2"></i>Edit Profile</button>
-                <button class="btn btn-outline-danger"><i class="bi bi-trash-fill me-2"></i>Delete Account</button>
-            </div>
+        <div class="row mb-3">
+          <div class="col-md-4 fw-bold">Email:</div>
+          <div class="col-md-8">${userEmail}</div>
         </div>
-            </div>
+        <div class="row mb-3">
+          <div class="col-md-4 fw-bold">Username:</div>
+          <div class="col-md-8">jdoe123</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-4 fw-bold">Total Balance:</div>
+          <div class="col-md-8 text-success fw-bold">$1,250.00</div>
+        </div>
+      </div>
 
-        `,
+      <!-- User Rank in Profile -->
+      <div class="card custom-card mb-4">
+        <h4 class="mb-3">Your Rank</h4>
+        <div class="d-flex align-items-center">
+          <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronce</span>
+          <div class="flex-grow-1">
+            <div class="progress" style="height: .6rem;">
+              <div id="profile-rank-progress"
+                   class="progress-bar bg-warning"
+                   role="progressbar"
+                   style="width: 40%;"
+                   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+            <small id="user-rank-text" style="color: white;">400 / 1000 pts</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Actions -->
+      <div class="card custom-card">
+        <h4 class="mb-3">Account Actions</h4>
+        <div class="d-flex gap-3">
+          <button class="btn btn-outline-light">
+            <i class="bi bi-pencil-fill me-2"></i>Edit Profile
+          </button>
+          <button class="btn btn-outline-danger">
+            <i class="bi bi-trash-fill me-2"></i>Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
             history: `
       <h2 class="mb-4">Transaction History</h2>
       <div class="card custom-card">
@@ -333,9 +376,7 @@ Content js-->
                     </form>
                 </div>
             `
-
         };
-
 
         if (logoutLink) {
             logoutLink.addEventListener("click", function (e) {
@@ -357,78 +398,71 @@ Content js-->
         function loadView(view) {
             content.innerHTML = views[view] || "<h2>Not Found</h2>";
 
-            // Botones de modal
+            // 1) Modales de depósito y envío
             document.getElementById("deposit-link")
-                ?.addEventListener("click", e => { e.preventDefault(); new bootstrap.Modal(document.getElementById("deposit-modal")).show(); });
-            document.getElementById("send-link")?.addEventListener("click", async (e) => {
-                e.preventDefault();
-
-
-                // Mostrar el modal
-                const modalElement = document.getElementById("send-money-modal");
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-
-                // Limpiar opciones anteriores
-                const select = document.getElementById("selectPurse");
-                select.innerHTML = '<option value="">-- Select an account --</option>';
-
-                try {
-                    const response = await fetch("/users/getAccounts", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" }
-                    });
-
-                    if (!response.ok) throw new Error("Error fetching accounts");
-
-                    const accounts = await response.json();
-
-                    accounts.forEach(account => {
-                        const option = document.createElement("option");
-                        option.value = account.id;
-                        option.textContent = `Account ${account.id} - $${account.balance}`;
-                        select.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error("Error loading accounts:", error);
-                    const errorOption = document.createElement("option");
-                    errorOption.disabled = true;
-                    errorOption.textContent = "Error loading accounts";
-                    select.appendChild(errorOption);
-                }
-            });
-
-            document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
-                e.preventDefault();
-                loadView("bank_accounts");
-
-            });
-
-            // HOME → cargar 3 transacciones recientes
-            if (view === "home") {
-                document.getElementById("see-history")?.addEventListener("click", e => {
-                    e.preventDefault(); loadView("history");
+                ?.addEventListener("click", e => {
+                    e.preventDefault();
+                    new bootstrap.Modal(document.getElementById("deposit-modal")).show();
+                });
+            document.getElementById("send-link")
+                ?.addEventListener("click", async e => {
+                    e.preventDefault();
+                    const modal = new bootstrap.Modal(document.getElementById("send-money-modal"));
+                    modal.show();
                 });
 
+            // 2) Botón “Bank Accounts”
+            document.getElementById("btn-bank-accounts")
+                ?.addEventListener("click", e => {
+                    e.preventDefault();
+                    loadView("bank_accounts");
+                });
+
+            // *** Todo lo que va dentro de HOME ***
+            if (view === "home") {
+                // a) Navegar a History
+                document.getElementById("see-history")
+                    ?.addEventListener("click", e => {
+                        e.preventDefault();
+                        loadView("history");
+                    });
+
+                // b) Cargar rango del usuario
+                fetch("/points/top?n=1")
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.length) {
+                            const dto = data[0];
+                            const thresholds = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: 10000 };
+                            const next = thresholds[dto.rangeUser] || dto.accumulatedPoints;
+                            const pct = Math.round(dto.accumulatedPoints / next * 100);
+                            document.getElementById("user-rank-badge").textContent = dto.rangeUser;
+                            const bar = document.getElementById("user-rank-progress");
+                            bar.style.width = pct + "%";
+                            bar.setAttribute("aria-valuenow", pct);
+                            document.getElementById("user-rank-text").textContent = `${dto.accumulatedPoints} / ${next} pts`;
+                        }
+                    })
+                    .catch(console.error);
+
+                // c) Transacciones recientes
                 fetch("/transaction/recent")
                     .then(r => r.json())
                     .then(data => {
-
                         const c = document.getElementById("recent-transactions");
                         c.innerHTML = data.length
                             ? data.map(tx => {
                                 const pos = tx.amount >= 0;
                                 return `
-                  <div class="transaction-item d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-${pos ? "arrow-down-circle text-success" : "arrow-up-circle text-danger"} me-2"></i>${tx.description || tx.type}</span>
-                    <span class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</span>
-                  </div>`;
+                    <div class="transaction-item d-flex justify-content-between align-items-center">
+                      <span><i class="bi bi-${pos ? "arrow-down-circle text-success" : "arrow-up-circle text-danger"} me-2"></i>${tx.description || tx.type}</span>
+                      <span class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</span>
+                    </div>`;
                             }).join("")
                             : "<p class='text-center'>No transactions yet.</p>";
-                    });
+                    })
+                    .catch(console.error);
             }
-
-            // HISTORY → cargar todas las transacciones
             if (view === "history") {
                 fetch("/transaction/all")
                     .then(r => r.json())
@@ -438,59 +472,45 @@ Content js-->
                             ? data.map(tx => {
                                 const pos = tx.amount >= 0;
                                 return `
-                  <tr>
-                    <td>#${tx.id}</td>
-                    <td>${tx.destination}</td>
-                    <td class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</td>
-                    <td>${tx.description || ""}</td>
-                    <td>${tx.date.split("T")[0]}</td>
-                  </tr>`;
+                    <tr>
+                      <td>#${tx.id}</td>
+                      <td>${tx.destination}</td>
+                      <td class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</td>
+                      <td>${tx.description || ""}</td>
+                      <td>${tx.date.split("T")[0]}</td>
+                    </tr>`;
                             }).join("")
                             : `<tr><td colspan="5" class="text-center">No transactions yet.</td></tr>`;
-                    });
+                    })
+                    .catch(console.error);
             }
-
-
-            //para cargar las cuentas
             if (view === "bank_accounts" || view === "home") {
-                fetch("/users/getAccounts", {
-                    method: "POST"
-                })
+                fetch("/users/getAccounts", { method: "POST" })
                     .then(r => r.json())
                     .then(data => {
-
                         const list = document.getElementById("bank-accounts-list");
                         list.innerHTML = data.length
-                            ? data.map(account => `
-                    <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Account #${account.id}</strong><br>
-                            Number: ${account.accountNumber}
-                        </div>
-                        <span class="badge bg-primary rounded-pill">$${account.balance.toFixed(2)}</span>
-                    </li>
-                `).join("")
+                            ? data.map(a => `
+                  <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                    <div><strong>Account #${a.id}</strong><br>Number: ${a.accountNumber}</div>
+                    <span class="badge bg-primary rounded-pill">$${a.balance.toFixed(2)}</span>
+                  </li>`).join("")
                             : `<li class="list-group-item bg-dark text-light text-center">No accounts yet.</li>`;
-                    });
+                    })
+                    .catch(console.error);
             }
-
-
-
-
-
         }
 
-        // Arranca en home
+        // Arranca en HOME
         loadView("home");
-        // Navegación lateral
-        document.querySelectorAll(".nav-link[data-section]").forEach(a =>
-            a.addEventListener("click", e => {
+
+        // Nav lateral
+        document.querySelectorAll(".nav-link[data-section]")
+            .forEach(a => a.addEventListener("click", e => {
                 e.preventDefault();
                 loadView(a.dataset.section);
-            })
-        );
+            }));
     });
-
 </script>
 
 
