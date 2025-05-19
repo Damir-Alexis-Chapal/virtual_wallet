@@ -201,21 +201,21 @@ Content js-->
               <div id="user-rank-progress"
                    class="progress-bar bg-warning"
                    role="progressbar"
-                   style="width: 40%;"
-                   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                   style="width: 0%;"
+                   aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
               </div>
             </div>
-            <small id="user-rank-text" style="color: white;">400 / 1000 pts</small>
+            <small id="user-rank-text" style="color: white;">0 / 500 pts</small>
           </div>
         </div>
       </div>
 
-      <!-- Transactions History -->
+      <!-- Movements -->
       <div class="card custom-card">
-        <h3 class="mb-3">Transaction History</h3>
+        <h3 class="mb-3">Movements</h3>
         <div id="recent-transactions"></div>
         <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">
-          See all transactions
+          See all movements
         </a>
       </div>
     </div>
@@ -237,25 +237,28 @@ Content js-->
         </div>
         <div class="row mb-3">
           <div class="col-md-4 fw-bold">Total Balance:</div>
-          <div class="col-md-8 text-success fw-bold">$1,250.00</div>
+          <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
         </div>
       </div>
 
       <!-- User Rank in Profile -->
       <div class="card custom-card mb-4">
-        <h4 class="mb-3">Your Rank</h4>
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center mb-3">
+          <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
+          <h4 class="mb-0">Your Rank</h4>
+        </div>
+        <div class="d-flex align-items-center mb-2">
           <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronce</span>
           <div class="flex-grow-1">
             <div class="progress" style="height: .6rem;">
               <div id="profile-rank-progress"
                    class="progress-bar bg-warning"
                    role="progressbar"
-                   style="width: 40%;"
-                   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                   style="width: 0%;"
+                   aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
               </div>
             </div>
-            <small id="user-rank-text" style="color: white;">400 / 1000 pts</small>
+            <small id="profile-rank-text" style="color: white;">0 / 500 pts</small>
           </div>
         </div>
       </div>
@@ -275,19 +278,26 @@ Content js-->
     </div>
   `,
             history: `
-      <h2 class="mb-4">Transaction History</h2>
-      <div class="card custom-card">
-        <h4 class="mb-3">All Transactions</h4>
-        <div class="table-responsive">
-          <table class="table table-dark table-striped table-hover align-middle">
-            <thead>
-              <tr><th>ID</th><th>Destiny</th><th>Amount</th><th>Description</th><th>Date</th></tr>
-            </thead>
-            <tbody id="all-transactions"></tbody>
-          </table>
-        </div>
-      </div>
-    `,statistics: `
+  <h2 class="mb-4">Movements</h2>
+  <div class="card custom-card">
+    <h4 class="mb-3">All movements</h4>
+    <div class="table-responsive">
+      <table class="table table-dark table-striped table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Destiny</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="all-transactions"></tbody>
+      </table>
+    </div>
+  </div>
+`,statistics: `
   <div class="container mt-4">
     <h2 class="mb-4">Statistics</h2>
 
@@ -492,70 +502,224 @@ Content js-->
 
 
             if (view === "home") {
-                // a) Navegar a History
-                document.getElementById("see-history")
-                    ?.addEventListener("click", e => {
-                        e.preventDefault();
-                        loadView("history");
-                    });
 
-                // b) Cargar rango del usuario
+                fetch("/users/getAccounts", { method: "POST" })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Error fetching accounts");
+                        return res.json();
+                    })
+                    .then(accts => {
+                        // sumo los balances de todas las cuentas
+                        const total = accts.reduce((sum, a) => sum + parseFloat(a.balance), 0);
+                        // muestro en el panel
+                        document.querySelector(".balance-amount").textContent = `$${total.toFixed(2)}`;
+                    })
+                    .catch(err => console.error("Error loading balance:", err));
+                // 1) navegación a Movements
+                document.getElementById("see-history")?.addEventListener("click", e => {
+                    e.preventDefault();
+                    loadView("history");
+                });
+
+                // 2) fetch de rango y puntos
                 fetch("/points/top?n=1")
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.length) {
-                            const dto = data[0];
-                            const thresholds = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: 10000 };
-                            const next = thresholds[dto.rangeUser] || dto.accumulatedPoints;
-                            const pct = Math.round(dto.accumulatedPoints / next * 100);
-                            document.getElementById("user-rank-badge").textContent = dto.rangeUser;
-                            const bar = document.getElementById("user-rank-progress");
-                            bar.style.width = pct + "%";
-                            bar.setAttribute("aria-valuenow", pct);
-                            document.getElementById("user-rank-text").textContent = `${dto.accumulatedPoints} / ${next} pts`;
-                        }
+                    .then(res => {
+                        if (!res.ok) throw new Error("Network response was not ok");
+                        return res.json();
                     })
-                    .catch(console.error);
+                    .then(data => {
+                        if (!data.length) return;
+                        const { accumulatedPoints, rangeUser } = data[0];
+                        const limits = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: Number.MAX_SAFE_INTEGER };
+                        const maxPts = limits[rangeUser] || 500;
+                        const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
 
-                // c) Transacciones recientes
+                        document.getElementById("user-rank-badge").textContent =
+                            rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+                        const bar = document.getElementById("user-rank-progress");
+                        bar.style.width = pct + "%";
+                        bar.setAttribute("aria-valuenow", pct);
+                        document.getElementById("user-rank-text").textContent =
+                            `${accumulatedPoints} / ${maxPts} pts`;
+                    })
+                    .catch(err => console.error("Error loading points:", err));
+
+                // 3) fetch de 3 transacciones recientes con tipado y colores
                 fetch("/transaction/recent")
-                    .then(r => r.json())
+                    .then(r => {
+                        if (!r.ok) throw new Error("Error fetching recent transactions");
+                        return r.json();
+                    })
                     .then(data => {
-                        const c = document.getElementById("recent-transactions");
-                        c.innerHTML = data.length
-                            ? data.map(tx => {
-                                const pos = tx.amount >= 0;
-                                return `
-                    <div class="transaction-item d-flex justify-content-between align-items-center">
-                      <span><i class="bi bi-${pos ? "arrow-down-circle text-success" : "arrow-up-circle text-danger"} me-2"></i>${tx.description || tx.type}</span>
-                      <span class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</span>
-                    </div>`;
-                            }).join("")
-                            : "<p class='text-center'>No transactions yet.</p>";
+                        const container = document.getElementById("recent-transactions");
+                        if (!data.length) {
+                            container.innerHTML = "<p class='text-center'>No transactions yet.</p>";
+                            return;
+                        }
+                        container.innerHTML = data.map(tx => {
+                            // Traducir tipo y elegir icono + color
+                            let iconClass, amountClass, tipoLabel;
+                            switch (tx.type) {
+                                case "DEPOSIT":
+                                    tipoLabel   = "Depósito";
+                                    iconClass   = "bi-arrow-down-circle text-success";
+                                    amountClass = "text-success";
+                                    break;
+                                case "WITHDRAWAL":
+                                    tipoLabel   = "Retiro";
+                                    iconClass   = "bi-arrow-up-circle text-danger";
+                                    amountClass = "text-danger";
+                                    break;
+                                case "TRANSFER":
+                                    tipoLabel   = "Transferencia";
+                                    iconClass   = "bi-arrow-right-circle text-warning";
+                                    amountClass = "text-warning";
+                                    break;
+                                default:
+                                    tipoLabel   = tx.type;
+                                    iconClass   = "bi-circle";
+                                    amountClass = "";
+                            }
+
+                            const sign = (tx.type === "WITHDRAWAL") ? "-" : "+";
+                            const absAmt = Math.abs(tx.amount).toFixed(2);
+
+                            return `
+        <div class="transaction-item d-flex justify-content-between align-items-center">
+          <span>
+            <i class="bi ${iconClass} me-2"></i>
+            ${tipoLabel}: ${tx.description || ""}
+          </span>
+          <span class="${amountClass}">
+            ${sign} $${absAmt}
+          </span>
+        </div>
+      `;
+                        }).join("");
+                    })
+                    .catch(err => console.error("Error loading recent transactions:", err));
+            }
+
+            if (view === "profile") {
+                fetch("/points/top?n=1")
+                    .then(res => {
+                        if (!res.ok) throw new Error("Network response was not ok");
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (!data.length) return;
+                        const { accumulatedPoints, rangeUser } = data[0];
+                        const limits = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: Number.MAX_SAFE_INTEGER };
+                        const maxPts = limits[rangeUser] || 500;
+                        const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+
+                        document.getElementById("profile-rank-badge").textContent =
+                            rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+                        const bar = document.getElementById("profile-rank-progress");
+                        bar.style.width = pct + "%";
+                        bar.setAttribute("aria-valuenow", pct);
+                        document.getElementById("profile-rank-text").textContent =
+                            `${accumulatedPoints} / ${maxPts} pts`;
+                    })
+                    .catch(err => console.error("Error loading profile points:", err));
+
+                fetch("/users/getAccounts", { method: "POST" })
+                    .then(res => res.ok ? res.json() : Promise.reject("Error fetching accounts"))
+                    .then(accts => {
+                        // sumamos todos los balances
+                        const total = accts.reduce((sum, acct) => sum + parseFloat(acct.balance), 0);
+                        document.getElementById("profile-balance").textContent = `$${total.toFixed(2)}`;
                     })
                     .catch(console.error);
             }
+
+
             if (view === "history") {
-                fetch("/transaction/all")
-                    .then(r => r.json())
-                    .then(data => {
-                        const t = document.getElementById("all-transactions");
-                        t.innerHTML = data.length
-                            ? data.map(tx => {
-                                const pos = tx.amount >= 0;
-                                return `
-                    <tr>
-                      <td>#${tx.id}</td>
-                      <td>${tx.destination}</td>
-                      <td class="${pos ? "text-success" : "text-danger"}">${pos ? "+" : "-"} $${Math.abs(tx.amount).toFixed(2)}</td>
-                      <td>${tx.description || ""}</td>
-                      <td>${tx.date.split("T")[0]}</td>
-                    </tr>`;
-                            }).join("")
-                            : `<tr><td colspan="5" class="text-center">No transactions yet.</td></tr>`;
+                // 1) Inyectamos la plantilla que incluye el balance
+                content.innerHTML = `
+    <h2 class="mb-4">Movements</h2>
+
+    <!-- Balance Card -->
+    <div class="card custom-card mb-4">
+      <h3>Current Balance</h3>
+      <p class="balance-amount">$0.00</p>
+    </div>
+
+    <!-- Full Movements Table -->
+    <div class="card custom-card">
+      <h4 class="mb-3">All movements</h4>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Destiny</th>
+              <th>Amount</th>
+              <th>Description</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="all-movements"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+                // 2) Cargar y mostrar el balance real
+                fetch("/users/getAccounts", { method: "POST" })
+                    .then(res => res.ok ? res.json() : Promise.reject("Error fetching accounts"))
+                    .then(accts => {
+                        const total = accts.reduce((sum, a) => sum + parseFloat(a.balance), 0);
+                        document.querySelector(".balance-amount").textContent = `$${total.toFixed(2)}`;
                     })
-                    .catch(console.error);
+                    .catch(err => console.error(err));
+
+                fetch("/transaction/all")
+                    .then(res => res.ok ? res.json() : Promise.reject("Error fetching transactions"))
+                    .then(data => {
+                        const tbody = document.getElementById("all-movements");
+                        tbody.innerHTML = data.length
+                            ? data.map(tx => {
+                                // Traducir el tipo
+                                const tipo = {
+                                    DEPOSIT:    "Depósito",
+                                    WITHDRAWAL: "Retiro",
+                                    TRANSFER:   "Transferencia"
+                                }[tx.type] || tx.type;
+
+                                // Clase de color según tipo
+                                let amountClass;
+                                switch (tx.type) {
+                                    case "DEPOSIT":    amountClass = "text-success"; break;
+                                    case "WITHDRAWAL": amountClass = "text-danger";  break;
+                                    case "TRANSFER":   amountClass = "text-warning"; break;
+                                    default:           amountClass = "";
+                                }
+
+                                const sign = (tx.type === "WITHDRAWAL") ? "-" : "+";
+                                const absAmt = Math.abs(tx.amount).toFixed(2);
+
+                                return `
+              <tr>
+                <td>#${tx.id}</td>
+                <td class="${amountClass}">${tipo}</td>
+                <td>${tx.destination}</td>
+                <td class="${amountClass}">
+                  ${sign} $${absAmt}
+                </td>
+                <td>${tx.description || ""}</td>
+                <td>${tx.date.split("T")[0]}</td>
+              </tr>
+            `;
+                            }).join("")
+                            : `<tr><td colspan="6" class="text-center">No movements yet.</td></tr>`;
+                    })
+                    .catch(err => console.error(err));
             }
+
+
+
             if (view === "bank_accounts" || view === "home") {
                 fetch("/users/getAccounts", {
                     method: "POST"

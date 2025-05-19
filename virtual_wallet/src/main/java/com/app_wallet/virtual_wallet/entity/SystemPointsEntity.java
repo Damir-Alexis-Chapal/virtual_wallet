@@ -75,8 +75,8 @@ public class SystemPointsEntity implements Comparable<SystemPointsEntity> {
     }
 
     private RangeUser calculateRange(int pts) {
-        if (pts >= 5000)   return RangeUser.PLATINUM;
-        if (pts >= 1000)   return RangeUser.GOLD;
+        if (pts > 5000)    return RangeUser.PLATINUM;
+        if (pts >= 1001)   return RangeUser.GOLD;
         if (pts >=  501)   return RangeUser.SILVER;
         return RangeUser.BRONZE;
     }

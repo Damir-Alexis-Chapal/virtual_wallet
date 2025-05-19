@@ -71,4 +71,8 @@ public class PointsService {
                         .orElseThrow())
                 .toList();
     }
+
+    public Optional<SystemPointsEntity> findByUserId(Long userId) {
+        return repo.findByUserId(userId);
+    }
 }

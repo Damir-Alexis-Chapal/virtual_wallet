@@ -42,6 +42,4 @@ public class AccountService {
                 .map(AccountMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
-
 }

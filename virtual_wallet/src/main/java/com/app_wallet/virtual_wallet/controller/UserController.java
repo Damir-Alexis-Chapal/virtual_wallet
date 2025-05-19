@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,10 +78,5 @@ public class UserController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(categories);
     }
-
-
-
-
-
 
 }
