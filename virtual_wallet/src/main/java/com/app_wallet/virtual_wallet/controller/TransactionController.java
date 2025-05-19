@@ -97,6 +97,14 @@ public class TransactionController {
                 ? Collections.emptyList()
                 : transactionService.getAllTransactions(user.getId()).toJavaList();
     }
+    //esto aun no funciona, esta sin implementar
+    @GetMapping("/deposit")
+    @ResponseBody
+    public List<TransactionDTO> deposit(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        return null;
+
+    }
 
 
 }
