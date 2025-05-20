@@ -195,7 +195,7 @@ Content js-->
           <h4 class="mb-0">Your Rank</h4>
         </div>
         <div class="d-flex align-items-center mb-2">
-          <span id="user-rank-badge" class="badge bg-secondary me-3">Bronce</span>
+          <span id="user-rank-badge" class="badge bg-secondary me-3">Bronze</span>
           <div class="flex-grow-1">
             <div class="progress" style="height: .6rem;">
               <div id="user-rank-progress"
@@ -248,7 +248,7 @@ Content js-->
           <h4 class="mb-0">Your Rank</h4>
         </div>
         <div class="d-flex align-items-center mb-2">
-          <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronce</span>
+          <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronze</span>
           <div class="flex-grow-1">
             <div class="progress" style="height: .6rem;">
               <div id="profile-rank-progress"
@@ -563,7 +563,7 @@ Content js-->
                     .then(data => {
                         if (!data.length) return;
                         const { accumulatedPoints, rangeUser } = data[0];
-                        const limits = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: Number.MAX_SAFE_INTEGER };
+                        const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
                         const maxPts = limits[rangeUser] || 500;
                         const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
 
@@ -642,7 +642,7 @@ Content js-->
                     .then(data => {
                         if (!data.length) return;
                         const { accumulatedPoints, rangeUser } = data[0];
-                        const limits = { BRONCE: 500, PLATA: 1000, ORO: 5000, PLATINO: Number.MAX_SAFE_INTEGER };
+                        const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
                         const maxPts = limits[rangeUser] || 500;
                         const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
 
@@ -716,9 +716,9 @@ Content js-->
                             ? data.map(tx => {
                                 // Traducir el tipo
                                 const tipo = {
-                                    DEPOSIT:    "Depósito",
-                                    WITHDRAWAL: "Retiro",
-                                    TRANSFER:   "Transferencia"
+                                    DEPOSIT:    "Deposit",
+                                    WITHDRAWAL: "Withdrawal",
+                                    TRANSFER:   "Transfer"
                                 }[tx.type] || tx.type;
 
                                 // Clase de color según tipo
