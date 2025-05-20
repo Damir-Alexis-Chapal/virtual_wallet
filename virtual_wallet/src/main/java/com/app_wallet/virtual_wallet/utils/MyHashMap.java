@@ -29,7 +29,6 @@ public class MyHashMap<K,V> {
         return null;
     }
 
-    /** Itera sobre todas las claves del mapa */
     public List<K> keySet() {
         List<K> keys = new ArrayList<>();
         for (Entry bucket : buckets) {
