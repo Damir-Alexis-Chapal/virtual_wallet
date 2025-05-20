@@ -24,6 +24,7 @@ public class TransactionService {
 
     @Transactional
     public void saveTransaction(TransactionDTO dto, Long userId, Long accountOriginId) {
+
         TransactionEntity entity = TransactionMapper.toEntity(dto, userId, accountOriginId);
         transactionRepository.save(entity);
         pointsService.addPointsForTransaction(userId, dto.getType(), dto.getAmount());

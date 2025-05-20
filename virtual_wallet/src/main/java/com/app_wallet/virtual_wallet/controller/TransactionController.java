@@ -97,12 +97,48 @@ public class TransactionController {
                 ? Collections.emptyList()
                 : transactionService.getAllTransactions(user.getId()).toJavaList();
     }
-    //esto aun no funciona, esta sin implementar
-    @GetMapping("/deposit")
+
+
+    @PostMapping("/deposit")
     @ResponseBody
-    public List<TransactionDTO> deposit(HttpSession session) {
+    public ResponseEntity<?> deposit(HttpSession session,
+                                        @RequestParam BigDecimal depositAmount,
+                                        @RequestParam Long accountOriginNumber,
+                                        @RequestParam Long accountDestiny
+                                        ) {
+
+        String category = "OTHER";
+        String description = "DEPOSIT";
+        String type = "DEPOSIT";
+
         UserDTO user = (UserDTO) session.getAttribute("user");
-        return null;
+
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        System.out.println("/n/n cuenta destino "+accountDestiny.toString()+"/n/n/n");
+        AccountEntity destinationAccount = accountRepository.findByAccountNumber(accountDestiny);
+        if (destinationAccount == null) {
+            return ResponseEntity.status(404).body("Destination account not found");
+        }
+        destinationAccount.setBalance(destinationAccount.getBalance().add(depositAmount));
+
+        accountRepository.save(destinationAccount);
+
+        TransactionDTO dto = new TransactionDTO();
+
+        dto.setAmount(depositAmount);
+        dto.setDescription(description);
+        dto.setType(type);
+        dto.setDate(LocalDateTime.now());
+        dto.setDestination(String.valueOf(accountDestiny));
+        dto.setCategory(Category.valueOf(category));
+
+
+        transactionService.saveTransaction(dto, user.getId(), accountOriginNumber);
+
+        return ResponseEntity.ok("Transaction saved successfully.");
+
 
     }
 
