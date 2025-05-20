@@ -1,10 +1,16 @@
+<<<<<<< HEAD
 // src/main/java/com/app_wallet/virtual_wallet/service/WalletGraphService.java
+=======
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
 package com.app_wallet.virtual_wallet.service;
 
 import com.app_wallet.virtual_wallet.entity.WalletConnectionEntity;
 import com.app_wallet.virtual_wallet.repository.WalletConnectionRepository;
 import org.springframework.stereotype.Service;
+<<<<<<< HEAD
 import org.springframework.transaction.annotation.Transactional;
+=======
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
 
 import java.util.*;
 
@@ -41,6 +47,7 @@ public class WalletGraphService {
     public Map<Long, List<Long>> getAdjacencyMap() {
         return Collections.unmodifiableMap(adjacencyMap);
     }
+<<<<<<< HEAD
 
     @Transactional
     public void addConnection(Long userId, Long sourceWalletId, Long targetWalletId) {
@@ -51,4 +58,6 @@ public class WalletGraphService {
         repository.save(e);
         buildGraph(userId);
     }
+=======
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
 }
