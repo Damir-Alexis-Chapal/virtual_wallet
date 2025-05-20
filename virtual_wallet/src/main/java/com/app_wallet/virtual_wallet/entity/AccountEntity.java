@@ -1,5 +1,6 @@
 package com.app_wallet.virtual_wallet.entity;
 
+import com.app_wallet.virtual_wallet.model.WalletType;
 import com.app_wallet.virtual_wallet.utils.LinkedList;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -21,15 +22,19 @@ public class AccountEntity {
     @Column(nullable = false, unique=true)
     private Long accountNumber;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "wallet_type")
+    private WalletType type;
+
     public AccountEntity() {
     }
 
-    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber) {
+    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber, WalletType type) {
         this.id = id;
         this.balance = balance;
         this.userId = userId;
         this.accountNumber = accountNumber;
-
+        this.type = type;
     }
 
     public Long getId() {
@@ -59,5 +64,11 @@ public class AccountEntity {
     }
     public void setAccountNumber(Long accountNumber) {
         this.accountNumber = accountNumber;
+    }
+    public WalletType getType() {
+        return type;
+    }
+    public void setType(WalletType type) {
+        this.type = type;
     }
 }
