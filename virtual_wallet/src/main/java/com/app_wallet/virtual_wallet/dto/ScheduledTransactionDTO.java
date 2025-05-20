@@ -1,27 +1,22 @@
 package com.app_wallet.virtual_wallet.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import com.app_wallet.virtual_wallet.entity.Category;
+import lombok.Data;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
 public class ScheduledTransactionDTO {
     private Long id;
+    private Long userId;
+    private Long sourceAccountId;
+    private String destinationAccount;
     private BigDecimal amount;
-    private LocalDate date;
-
-    public ScheduledTransactionDTO() {}
-
-    public ScheduledTransactionDTO(Long id, BigDecimal amount, LocalDate date) {
-        this.id = id;
-        this.amount = amount;
-        this.date = date;
-    }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    private String description;
+    private String type;
+    private Category category;
+    private LocalDateTime scheduledDate;
+    private String frequency;
+    private boolean active;
 }

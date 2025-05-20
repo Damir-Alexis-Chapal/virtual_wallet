@@ -1,42 +1,45 @@
 package com.app_wallet.virtual_wallet.entity;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import lombok.Data;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "scheduled_transactions")
+@Data
 public class ScheduledTransactionEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private TransactionEntity transaction;
-    private LocalDate date;
-
-    public ScheduledTransactionEntity() {
-    }
-
-    public ScheduledTransactionEntity(Long id, TransactionEntity transaction, LocalDate date) {
-        this.id = id;
-        this.transaction = transaction;
-        this.date = date;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TransactionEntity getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(TransactionEntity transaction) {
-        this.transaction = transaction;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    
+    @Column(nullable = false)
+    private Long userId;
+    
+    @Column(nullable = false)
+    private Long sourceAccountId;
+    
+    @Column(nullable = false)
+    private String destinationAccount;
+    
+    @Column(nullable = false)
+    private BigDecimal amount;
+    
+    @Column(nullable = false)
+    private String description;
+    
+    @Column(nullable = false)
+    private String type; // DEPOSIT, WITHDRAWAL, TRANSFER
+    
+    @Enumerated(EnumType.STRING)
+    private Category category;
+    
+    @Column(nullable = false)
+    private LocalDateTime scheduledDate;
+    
+    @Column(nullable = false)
+    private String frequency; // ONCE, DAILY, WEEKLY, MONTHLY
+    
+    private boolean active = true;
 }
