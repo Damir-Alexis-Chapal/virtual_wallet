@@ -32,7 +32,8 @@ public class AccountEntity {
     public AccountEntity() {
     }
 
-    public AccountEntity(Long id, BigDecimal balance, Long userId, Long walletId, Long accountNumber, WalletType type) {
+
+    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber, WalletType type) {
         this.id = id;
         this.balance = balance;
         this.userId = userId;

@@ -302,20 +302,28 @@ Content js-->
   `,wallets: `
   <div class="settings-container">
     <h2 class="mb-4">My Wallets</h2>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
     <div class="card custom-card mb-4">
       <h4 class="mb-3">Create New Wallet</h4>
       <form id="wallet-create-form">
         <div class="mb-3">
           <label for="wallet-name" class="form-label">Wallet Name</label>
+<<<<<<< HEAD
           <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
                  placeholder="e.g. Savings" required>
+=======
+          <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Savings" required>
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
         </div>
         <button type="submit" class="btn btn-success">Create Wallet</button>
       </form>
     </div>
 
     <div class="card custom-card">
+<<<<<<< HEAD
       <h4 class="mb-3">Your Wallets</h4>
       <div class="table-responsive">
         <table class="table table-dark table-striped align-middle">
@@ -345,6 +353,11 @@ Content js-->
   <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
   <button type="submit" class="btn btn-warning">Transfer</button>
 </form>
+=======
+      <h4 class="mb-3">Your Wallets & Connections</h4>
+      <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
+
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
       <h5>Connect Wallets</h5>
       <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
         <select id="source-wallet" class="form-select bg-dark text-white">
@@ -360,9 +373,13 @@ Content js-->
       <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
     </div>
   </div>
+<<<<<<< HEAD
 `
 
             ,
+=======
+`,
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
             history: `
   <h2 class="mb-4">Movements</h2>
   <div class="card custom-card">
@@ -829,6 +846,7 @@ Content js-->
                     .catch(err => console.error(err));
             }
 
+<<<<<<< HEAD
             // En tu script, dentro de loadView():
             if (view === "wallets") {
                 // 1) Renderizamos la plantilla HTML
@@ -996,7 +1014,69 @@ Content js-->
                         });
                 };
             }
+=======
+            if (view === "wallets") {
+                // Renderizamos la plantilla
+                content.innerHTML = views.wallets;
+>>>>>>> 651c9d0 (Wallets maso, ME FALTA REVISARLO BN TENGO SUEÑO XD)
 
+                // 1) Cargar mis wallets
+                fetch("/wallets?userId=" + user.id)
+                    .then(r => r.json())
+                    .then(list => {
+                        const ul = document.getElementById("wallet-list");
+                        ul.innerHTML = list.map(w =>
+                            `<li class="list-group-item bg-secondary text-white d-flex justify-content-between">
+           ${w.name} (ID:${w.id})
+         </li>`
+                        ).join("");
+                        // también rellena los selects de conexión
+                        const src = document.getElementById("source-wallet");
+                        const tgt = document.getElementById("target-wallet");
+                        [ul, ul].forEach((_, idx) => {
+                            const sel = idx===0 ? src : tgt;
+                            sel.innerHTML = `<option value="">${idx===0?"From":"To"}</option>` +
+                                list.map(w => `<option value="${w.id}">${w.name}</option>`).join("");
+                        });
+                    });
+
+                // 2) Crear nueva wallet
+                document.getElementById("wallet-create-form")
+                    .addEventListener("submit", e => {
+                        e.preventDefault();
+                        const name = document.getElementById("wallet-name").value;
+                        fetch("/wallets", {
+                            method: "POST",
+                            headers: {"Content-Type":"application/json"},
+                            body: JSON.stringify({ userId: user.id, name })
+                        }).then(() => loadView("wallets"));
+                    });
+
+                // 3) Conectar wallets en grafo
+                document.getElementById("wallet-connect-form")
+                    .addEventListener("submit", e => {
+                        e.preventDefault();
+                        const source = +document.getElementById("source-wallet").value;
+                        const target = +document.getElementById("target-wallet").value;
+                        if (!source || !target) return;
+                        fetch("/wallet/graph/connect", {
+                            method: "POST",
+                            headers: {"Content-Type":"application/json"},
+                            body: JSON.stringify({ userId: user.id, sourceWalletId: source, targetWalletId: target })
+                        }).then(() => {
+                            // recarga la visualización
+                            loadView("wallets");
+                        });
+                    });
+
+                // 4) Mostrar grafo
+                fetch("/wallet/graph?userId=" + user.id)
+                    .then(r => r.json())
+                    .then(map => {
+                        document.getElementById("wallet-graph").textContent =
+                            JSON.stringify(map, null, 2);
+                    });
+            }
 
             if (view === "bank_accounts" || view === "home") {
                 fetch("/users/getAccounts", {
