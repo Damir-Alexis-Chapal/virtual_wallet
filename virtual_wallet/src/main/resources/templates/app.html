@@ -301,21 +301,49 @@ Content js-->
   `,wallets: `
   <div class="settings-container">
     <h2 class="mb-4">My Wallets</h2>
+
     <div class="card custom-card mb-4">
       <h4 class="mb-3">Create New Wallet</h4>
       <form id="wallet-create-form">
         <div class="mb-3">
           <label for="wallet-name" class="form-label">Wallet Name</label>
-          <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Savings" required>
+          <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
+                 placeholder="e.g. Savings" required>
         </div>
         <button type="submit" class="btn btn-success">Create Wallet</button>
       </form>
     </div>
 
     <div class="card custom-card">
-      <h4 class="mb-3">Your Wallets & Connections</h4>
+      <h4 class="mb-3">Your Wallets</h4>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Balance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="wallet-table-body"></tbody>
+        </table>
+      </div>
+
+      <h5 class="mt-4">All Wallets List (for graph connect)</h5>
       <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
 
+
+      <h5 class="mt-4">Transfer Between Wallets</h5>
+<form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
+  <select id="wallet-from" class="form-select bg-dark text-white">
+    <option value="">From</option>
+  </select>
+  <select id="wallet-to" class="form-select bg-dark text-white">
+    <option value="">To</option>
+  </select>
+  <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
+  <button type="submit" class="btn btn-warning">Transfer</button>
+</form>
       <h5>Connect Wallets</h5>
       <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
         <select id="source-wallet" class="form-select bg-dark text-white">
@@ -331,7 +359,9 @@ Content js-->
       <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
     </div>
   </div>
-`,
+`
+
+            ,
             history: `
   <h2 class="mb-4">Movements</h2>
   <div class="card custom-card">
@@ -805,67 +835,174 @@ Content js-->
                     .catch(err => console.error(err));
             }
 
+            // En tu script, dentro de loadView():
             if (view === "wallets") {
-                // Renderizamos la plantilla
+                // 1) Renderizamos la plantilla HTML
                 content.innerHTML = views.wallets;
 
-                // 1) Cargar mis wallets
-                fetch("/wallets?userId=" + user.id)
-                    .then(r => r.json())
-                    .then(list => {
-                        const ul = document.getElementById("wallet-list");
-                        ul.innerHTML = list.map(w =>
-                            `<li class="list-group-item bg-secondary text-white d-flex justify-content-between">
-           ${w.name} (ID:${w.id})
-         </li>`
-                        ).join("");
-                        // también rellena los selects de conexión
-                        const src = document.getElementById("source-wallet");
-                        const tgt = document.getElementById("target-wallet");
-                        [ul, ul].forEach((_, idx) => {
-                            const sel = idx===0 ? src : tgt;
-                            sel.innerHTML = `<option value="">${idx===0?"From":"To"}</option>` +
+                // 2) Cargar mis wallets y volcarlas en tabla y lista de conexiones
+                Promise.all([
+                    fetch("/wallets?userId=" + user.id).then(r => r.json()),     // para lista simple
+                    fetch("/wallets?userId=" + user.id).then(r => r.json())      // lo mismo en tabla; podrías unificar
+                ]).then(([list, list2]) => {
+                    // 2a) Tabla de wallets con botón Manage
+                    const tbody = document.getElementById("wallet-table-body");
+                    tbody.innerHTML = list2.map(w => `
+      <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
+        <td>${w.name}</td>
+        <td>$${parseFloat(w.balance).toFixed(2)}</td>
+        <td>
+          <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
+        </td>
+      </tr>
+    `).join("");
+
+                    // 2b) Listado y selects para conexión
+                    const ul = document.getElementById("wallet-list");
+                    ul.innerHTML = list.map(w =>
+                        `<li data-id="${w.id}" data-name="${w.name}" data-balance="${w.balance}"
+           class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
+         ${w.name} — $${parseFloat(w.balance).toFixed(2)}
+       </li>`
+                    ).join("");
+
+                    const src = document.getElementById("source-wallet"),
+                        tgt = document.getElementById("target-wallet");
+                    [src, tgt].forEach((sel, i) => {
+                        sel.innerHTML =
+                            `<option value="">${i===0?"From":"To"}</option>` +
+                            list.map(w => `<option value="${w.id}">${w.name}</option>`).join("");
+                    });
+
+                    // También rellenar selects de transferencia
+                    const from = document.getElementById("wallet-from"),
+                        to   = document.getElementById("wallet-to");
+                    [from, to].forEach((sel, i) => {
+                        if (sel) {
+                            sel.innerHTML = `<option value="">${i===0 ? "From" : "To"}</option>` +
                                 list.map(w => `<option value="${w.id}">${w.name}</option>`).join("");
+                        }
+                    });
+
+
+                    // 3) Attach click en cada Manage
+                    document.querySelectorAll(".manage-wallet-btn").forEach(btn => {
+                        btn.addEventListener("click", e => {
+                            const tr = e.currentTarget.closest("tr");
+                            const id   = tr.dataset.walletId;
+                            const name = tr.dataset.walletName;
+                            const bal  = tr.dataset.walletBalance;
+
+                            // Rellenar modal
+                            document.getElementById("modal-wallet-name").textContent    = name;
+                            document.getElementById("modal-wallet-balance").textContent = parseFloat(bal).toFixed(2);
+                            document.getElementById("manage-amount").value = "";
+
+                            // Guardar walletId en el form
+                            const form = document.getElementById("wallet-manage-form");
+                            form.dataset.walletId = id;
+
+                            // Mostrar modal
+                            new bootstrap.Modal(document.getElementById("wallet-modal")).show();
                         });
                     });
+                }).catch(console.error);
 
-                // 2) Crear nueva wallet
-                document.getElementById("wallet-create-form")
-                    .addEventListener("submit", e => {
-                        e.preventDefault();
-                        const name = document.getElementById("wallet-name").value;
-                        fetch("/wallets", {
-                            method: "POST",
-                            headers: {"Content-Type":"application/json"},
-                            body: JSON.stringify({ userId: user.id, name })
-                        }).then(() => loadView("wallets"));
-                    });
+                document.getElementById("wallet-transfer-form").addEventListener("submit", e => {
+                    e.preventDefault();
+                    const from = document.getElementById("wallet-from").value;
+                    const to = document.getElementById("wallet-to").value;
+                    const amount = document.getElementById("wallet-transfer-amount").value;
 
-                // 3) Conectar wallets en grafo
-                document.getElementById("wallet-connect-form")
-                    .addEventListener("submit", e => {
-                        e.preventDefault();
-                        const source = +document.getElementById("source-wallet").value;
-                        const target = +document.getElementById("target-wallet").value;
-                        if (!source || !target) return;
-                        fetch("/wallet/graph/connect", {
-                            method: "POST",
-                            headers: {"Content-Type":"application/json"},
-                            body: JSON.stringify({ userId: user.id, sourceWalletId: source, targetWalletId: target })
-                        }).then(() => {
-                            // recarga la visualización
-                            loadView("wallets");
-                        });
-                    });
+                    if (!from || !to || !amount || from === to) return alert("Check input values");
 
-                // 4) Mostrar grafo
-                fetch("/wallet/graph?userId=" + user.id)
+                    fetch(`/wallets/transfer?fromWalletId=${from}&toWalletId=${to}&amount=${amount}`, {
+                        method: "POST"
+                    }).then(r => {
+                        if (!r.ok) return r.text().then(text => { throw new Error(text) });
+                        return r.text();
+                    }).then(msg => {
+                        alert(msg);
+                        loadView("wallets");
+                    }).catch(err => alert(err.message));
+                });
+
+                // 4) Crear nueva wallet
+                document.getElementById("wallet-create-form").addEventListener("submit", e => {
+                    e.preventDefault();
+                    const name = document.getElementById("wallet-name").value;
+                    fetch("/wallets", {
+                        method: "POST",
+                        headers: {"Content-Type":"application/json"},
+                        body: JSON.stringify({ userId: user.id, name })
+                    }).then(() => loadView("wallets"));
+                });
+
+                // 5) Conectar wallets en grafo
+                document.getElementById("wallet-connect-form").addEventListener("submit", e => {
+                    e.preventDefault();
+                    const source = +document.getElementById("source-wallet").value;
+                    const target = +document.getElementById("target-wallet").value;
+                    if (!source || !target) return;
+                    fetch("/wallets/graph/connect", {
+                        method: "POST",
+                        headers: {"Content-Type":"application/json"},
+                        body: JSON.stringify({ userId: user.id, sourceWalletId: source, targetWalletId: target })
+                    }).then(() => loadView("wallets"));
+                });
+
+                // 6) Mostrar grafo
+                fetch("/wallets/graph?userId=" + user.id)
                     .then(r => r.json())
                     .then(map => {
                         document.getElementById("wallet-graph").textContent =
                             JSON.stringify(map, null, 2);
                     });
+
+                // 7) Deposit & Withdraw dentro del modal
+                const form = document.getElementById("wallet-manage-form");
+                const amtInput = document.getElementById("manage-amount");
+                document.getElementById("btn-deposit").onclick = () => {
+                    const walletId = form.dataset.walletId;
+                    const amt = parseFloat(amtInput.value);
+                    if (!amt || amt <= 0) return alert("Enter a valid amount");
+                    fetch(`/wallets/${walletId}/deposit?amount=${amt}`, { method: "POST" })
+                        .then(r => r.json())
+                        .then(newBal => {
+                            document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
+                            loadView("wallets");
+                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
+                        })
+                        .catch(console.error);
+                };
+                document.getElementById("btn-withdraw").onclick = () => {
+                    const walletId = form.dataset.walletId;
+                    const amt = parseFloat(amtInput.value);
+                    if (!amt || amt <= 0) return alert("Enter a valid amount");
+                    fetch(`/wallets/${walletId}/withdraw?amount=${amt}`, { method: "POST" })
+                        .then(r => {
+                            if (!r.ok) throw new Error("Insufficient funds");
+                            return r.json();
+                        })
+                        .then(newBal => {
+                            document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
+                            loadView("wallets");
+                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
+                        })
+                        .catch(err => alert(err.message));
+                };
+
+                // 8) Delete Wallet
+                document.getElementById("wallet-delete-btn").onclick = e => {
+                    const walletId = document.getElementById("wallet-manage-form").dataset.walletId;
+                    fetch(`/wallets/${walletId}`, { method: "DELETE" })
+                        .then(() => {
+                            loadView("wallets");
+                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
+                        });
+                };
             }
+
 
             if (view === "bank_accounts" || view === "home") {
                 fetch("/users/getAccounts", {
@@ -975,6 +1112,38 @@ Content js-->
         </div>
     </div>
 </div>
+
+<!-- Modal de Gestión de Wallet -->
+<div class="modal fade" id="wallet-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Manage Wallet</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Name:</strong> <span id="modal-wallet-name"></span></p>
+                <p><strong>Balance:</strong> $<span id="modal-wallet-balance">0.00</span></p>
+                <form id="wallet-manage-form">
+                    <div class="mb-3">
+                        <label for="manage-amount" class="form-label">Amount</label>
+                        <input type="number" step="0.01" class="form-control bg-dark text-white" id="manage-amount" />
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-warning w-100" id="btn-withdraw">Withdraw</button>
+                        <button type="button" class="btn btn-success w-100" id="btn-deposit">Deposit</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-danger w-100" id="wallet-delete-btn">Delete Wallet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 
 <!-- Modal para la opcion de depositar -->

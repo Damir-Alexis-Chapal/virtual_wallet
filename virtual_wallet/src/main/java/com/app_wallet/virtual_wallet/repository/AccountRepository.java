@@ -11,7 +11,5 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     List<AccountEntity> findByUserId(Long userId);
     AccountEntity findByAccountNumber(Long accountNumber);
-
-
-
+    List<AccountEntity> findByWalletId(Long walletId);
 }

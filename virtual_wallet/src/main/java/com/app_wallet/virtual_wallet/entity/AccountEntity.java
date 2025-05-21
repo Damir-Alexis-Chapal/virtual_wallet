@@ -19,6 +19,9 @@ public class AccountEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "wallet_id", nullable = false)
+    private Long walletId;
+
     @Column(nullable = false, unique=true)
     private Long accountNumber;
 
@@ -29,10 +32,11 @@ public class AccountEntity {
     public AccountEntity() {
     }
 
-    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber, WalletType type) {
+    public AccountEntity(Long id, BigDecimal balance, Long userId, Long walletId, Long accountNumber, WalletType type) {
         this.id = id;
         this.balance = balance;
         this.userId = userId;
+        this.walletId = walletId;
         this.accountNumber = accountNumber;
         this.type = type;
     }
@@ -59,6 +63,8 @@ public class AccountEntity {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+    public Long getWalletId() { return walletId; }
+    public void setWalletId(Long walletId) { this.walletId = walletId; }
     public Long getAccountNumber() {
         return accountNumber;
     }
