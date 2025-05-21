@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
@@ -36,7 +38,10 @@ public class AccountController {
 
         accountService.saveAccount(dto);
 
-        return ResponseEntity.ok("Account saved successfully.");
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Account created successfully");
+        return ResponseEntity.ok(response);
     }
 
 }

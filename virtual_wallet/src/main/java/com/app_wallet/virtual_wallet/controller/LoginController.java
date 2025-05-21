@@ -8,14 +8,8 @@ public class LoginController {
 
     @GetMapping("/login")
     public String login() {
-        return "ask-for-log-sign-in"; // ask-for-log-sign-in.html
+        return "ask-for-log-sign-in";
     }
 
 
-    /*
-    @GetMapping("/gotoapp")
-    public String goToApp() {
-        return "app";
-    }
-     */
 }

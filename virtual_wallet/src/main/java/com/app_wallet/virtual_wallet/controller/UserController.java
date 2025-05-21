@@ -39,7 +39,7 @@ public class UserController {
         dto.setPhone(phone);
         customUserRepository.save(dto);
 
-        return ResponseEntity.ok("Usuario registrado exitosamente");
+        return ResponseEntity.ok("User created successfully");
     }
 
     @PostMapping("/login")
