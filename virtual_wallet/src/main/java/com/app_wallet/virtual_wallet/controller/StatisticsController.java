@@ -39,4 +39,7 @@ public class StatisticsController {
                 })
                 .collect(Collectors.toList());
     }
+
+
+
 }

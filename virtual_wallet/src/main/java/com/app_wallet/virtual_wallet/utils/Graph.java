@@ -44,4 +44,9 @@ public class Graph<T> {
         }
         return counts;
     }
+
+    public Set<T> getVertices() {
+        return adj.keySet();
+    }
+
 }
