@@ -30,11 +30,13 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> registerUser(@RequestParam String name,
                                                @RequestParam String email,
-                                               @RequestParam String password) {
+                                               @RequestParam String password,
+                                               @RequestParam String phone) {
         UserDTO dto = new UserDTO();
         dto.setName(name);
         dto.setEmail(email);
         dto.setPassword(password);
+        dto.setPhone(phone);
         customUserRepository.save(dto);
 
         return ResponseEntity.ok("Usuario registrado exitosamente");

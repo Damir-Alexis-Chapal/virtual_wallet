@@ -14,17 +14,19 @@ public class UserEntity {
     private String email;
     @Column(unique = true)
     private String password;
-
+    @Column(unique = true)
+    private String phone;
     @OneToOne(mappedBy = "user")
     private SystemPointsEntity points;
 
     public UserEntity() {}
 
-    public UserEntity(Long id, String name, String email, String password) {
+    public UserEntity(Long id, String name, String email, String password, String phone) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.phone = phone;
     }
 
     public Long getId() {
@@ -57,5 +59,12 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

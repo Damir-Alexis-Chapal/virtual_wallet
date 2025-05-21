@@ -16,10 +16,10 @@ public class AccountEntity {
     @Column(nullable = false)
     private BigDecimal balance;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", insertable = false, updatable = false)
     private Long userId;
 
-    @Column(name = "wallet_id", nullable = false)
+    @Column(name = "wallet_id", nullable = true)
     private Long walletId;
 
     @Column(nullable = false, unique=true)
@@ -29,11 +29,15 @@ public class AccountEntity {
     @Column(name = "wallet_type")
     private WalletType type;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     public AccountEntity() {
     }
 
 
-    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber, WalletType type) {
+    public AccountEntity(Long id, BigDecimal balance, Long userId, Long accountNumber, WalletType type, Long walletId) {
         this.id = id;
         this.balance = balance;
         this.userId = userId;
@@ -78,4 +82,12 @@ public class AccountEntity {
     public void setType(WalletType type) {
         this.type = type;
     }
+    public UserEntity getUser() {
+        return user;
+    }
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+
 }

@@ -8,21 +8,25 @@ public class UserDTO {
     private String name;
     private String email;
     private String password;
-
+    private String phone;
 
     public UserDTO() {
     }
 
-    public UserDTO(Long id, String name, String email) {
+    public UserDTO(Long id, String name, String email,String phone) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.phone = phone;
 
     }
 
     public UserDTO(Long id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public UserDTO(Long userId, String s, String s1) {
     }
 
     public String getPassword() {
@@ -55,6 +59,13 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
 

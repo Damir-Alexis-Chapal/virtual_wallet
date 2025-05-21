@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static org.springframework.data.repository.util.ClassUtils.ifPresent;
+
 @Service
 public class StatisticsService {
 
@@ -111,7 +113,7 @@ public class StatisticsService {
         });
 
       } catch (NumberFormatException e) {
-        // Puedes registrar si quieres saber qué dato causó el problema
+
         System.err.println("Número de cuenta destino inválido: " + destAccountNumber);
       }
     }
