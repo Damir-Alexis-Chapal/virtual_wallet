@@ -40,6 +40,19 @@ public class StatisticsController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/stats/clients/frequent")
+    public List<Map<String,Object>> frequentTransfers(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return Collections.emptyList();
+        return stats.frequentClientTransfers(userId);
+    }
 
+
+    @GetMapping("/stats/clients/groups")
+    public List<List<Map<String,Object>>> affinityGroups(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return Collections.emptyList();
+        return stats.findAffinityGroups(userId);
+    }
 
 }

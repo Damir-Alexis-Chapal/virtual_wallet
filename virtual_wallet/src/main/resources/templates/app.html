@@ -387,7 +387,7 @@ Content js-->
   <div class="container mt-4">
     <h2 class="mb-4">Statistics</h2>
 
-    <!-- Sección de actividad por categoría -->
+    <!-- 1) Patrones por categoría -->
     <div class="card custom-card mb-4">
       <div class="card-body">
         <h5 class="card-title">Spending Patterns by Category</h5>
@@ -395,7 +395,7 @@ Content js-->
       </div>
     </div>
 
-    <!-- Sección de actividad de transferencia entre usuarios -->
+    <!-- 2) Transferencias frecuentes -->
     <div class="card custom-card mb-4">
       <div class="card-body">
         <h5 class="card-title">Frequent Transfer Targets</h5>
@@ -403,11 +403,11 @@ Content js-->
       </div>
     </div>
 
-    <!-- Relaciones de afinidad (opcional, con grafos) -->
+    <!-- 3) Grupos de afinidad -->
     <div class="card custom-card mb-4">
       <div class="card-body">
         <h5 class="card-title">Affinity Groups</h5>
-        <div id="affinity-groups" class="text-light"></div>
+        <div id="affinity-groups" class="d-flex flex-column gap-2 text-light"></div>
       </div>
     </div>
   </div>
@@ -1021,36 +1021,56 @@ Content js-->
             }
 
             if (view === "statistics") {
-                // Petición al backend
+                // 1) Category transitions (barras)
                 fetch("/stats/patterns/categories")
-                    .then(r => r.json())
-                    .then(data => {
-                        const labels = data.map(d => d.category);
-                        const counts = data.map(d => d.count);
-
+                    .then(r=>r.json())
+                    .then(data=>{
+                        const labels = data.map(d=>d.category);
+                        const counts = data.map(d=>d.count);
                         const ctx = document.getElementById("categoryChart").getContext("2d");
                         new Chart(ctx, {
                             type: "bar",
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: "Transitions by Category",
-                                    data: counts,
-                                    backgroundColor: "#f39c12"
-                                }]
-                            },
+                            data: { labels, datasets:[{ label:"Transitions", data:counts }] },
                             options: {
-                                scales: {
-                                    y: { beginAtZero: true }
-                                },
-                                plugins: {
-                                    legend: { display: false }
-                                }
+                                scales: { y:{ beginAtZero:true, ticks:{ color:"white" }}, x:{ ticks:{ color:"white" }} },
+                                plugins: { legend:{ display:false } }
                             }
                         });
-                    })
-                    .catch(console.error);
+                    }).catch(console.error);
+
+                // 2) Frequent Transfers (barras horizontales)
+                fetch("/stats/clients/frequent")
+                    .then(r=>r.json())
+                    .then(data=>{
+                        const labels = data.map(d=>d.label);
+                        const counts = data.map(d=>d.count);
+                        const ctx = document.getElementById("clientGraphChart").getContext("2d");
+                        new Chart(ctx, {
+                            type: "bar",
+                            data: { labels, datasets:[{ label:"Transfers", data:counts }] },
+                            options: {
+                                indexAxis: 'y',
+                                scales: { x:{ beginAtZero:true, ticks:{ color:"white" }}, y:{ ticks:{ color:"white" }} },
+                                plugins: { legend:{ display:false } }
+                            }
+                        });
+                    }).catch(console.error);
+
+                // 3) Affinity groups (badges)
+                fetch("/stats/clients/groups")
+                    .then(r=>r.json())
+                    .then(groups=>{
+                        const container = document.getElementById("affinity-groups");
+                        container.innerHTML = groups.length
+                            ? groups.map((grp,i)=>`
+            <div class="badge bg-secondary p-2">
+              Group ${i+1}: ${grp.map(u=>u.label).join(", ")}
+            </div>
+          `).join("")
+                            : `<p class="text-center text-muted">No affinity groups.</p>`;
+                    }).catch(console.error);
             }
+
 
         }
 

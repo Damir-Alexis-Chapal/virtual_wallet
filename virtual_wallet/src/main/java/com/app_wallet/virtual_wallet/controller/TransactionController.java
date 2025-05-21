@@ -9,9 +9,11 @@ import com.app_wallet.virtual_wallet.service.AccountService;
 import com.app_wallet.virtual_wallet.service.TransactionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,7 +25,7 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final AccountRepository accountRepository;
+    private final AccountRepository     accountRepository;
     @Autowired
     public TransactionController(TransactionService transactionService,  AccountRepository accountRepository) {
         this.transactionService = transactionService;
@@ -44,10 +46,8 @@ public class TransactionController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        AccountEntity destinationAccount = accountRepository.findByAccountNumber(accountNumber);
-        if (destinationAccount == null) {
-            return ResponseEntity.status(404).body("Destination account not found");
-        }
+        AccountEntity destinationAccount = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination account not found"));
 
         AccountEntity originAccount = accountRepository.findById(accountOriginId).orElse(null);
         if (originAccount == null) {
@@ -117,7 +117,9 @@ public class TransactionController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         System.out.println("/n/n cuenta destino "+accountDestiny.toString()+"/n/n/n");
-        AccountEntity destinationAccount = accountRepository.findByAccountNumber(accountDestiny);
+        AccountEntity destinationAccount = accountRepository.findByAccountNumber(accountDestiny)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination account not found"));
+
         if (destinationAccount == null) {
             return ResponseEntity.status(404).body("Destination account not found");
         }

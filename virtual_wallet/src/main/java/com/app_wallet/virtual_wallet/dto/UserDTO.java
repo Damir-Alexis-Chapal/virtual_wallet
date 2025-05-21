@@ -20,6 +20,11 @@ public class UserDTO {
 
     }
 
+    public UserDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -51,5 +56,6 @@ public class UserDTO {
     public void setEmail(String email) {
         this.email = email;
     }
+
 
 }
