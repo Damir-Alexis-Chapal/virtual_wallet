@@ -86,13 +86,24 @@ public class TransactionController {
 
         transactionService.saveTransaction(dto, user.getId(), accountOriginId);
 
-        //notifications
+        /*
+        SI QUIEREN PROBAR LOS MESAJES QUITEN ESTE COMENTARIO, PERO NO ABUSEN DE ESO PORQUE SINO SE NOS ACABA LA PRUEBA GRATIS
+
+        !!OJO QUE SOLO FUNCIONA CON EL NUMERO DE CRISTHIAN Y EL MIO!!!
+        SI METEN OTRO NO SIRVE
+
+
+
+            //notifications
         //to destiny
         notificationService.sendEmail(destinationEmail, "BLINKER: ", user.getName() + " send you "+ "$"+amount + " to " + description);
         notificationService.sendSMS(destinationUser.getPhone(), "BLINKER: "+ user.getName() + " send you " + "$"+amount+ " to " + description);
         //to origin
         notificationService.sendEmail(user.getEmail(), "BLINKER: ", user.getName() + ", you send "+ "$"+amount + " to " + destinationUser.getName());
         notificationService.sendSMS(user.getPhone(), "BLINKER: "+ user.getName() + ", you send " + "$"+amount+ " to " + destinationUser.getName());
+
+         */
+
 
         return ResponseEntity.ok("Transaction saved successfully.");
     }
