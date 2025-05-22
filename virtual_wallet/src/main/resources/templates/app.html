@@ -163,6 +163,31 @@ Content js-->
 <script>
     let cuentas = [];
 
+    // Actualiza todos los lugares donde mostramos balance en caliente
+    function refreshBalances() {
+        // 1) Home
+        fetch("/users/getAccounts", { method: "POST" })
+            .then(r => r.ok ? r.json() : Promise.reject("Error"))
+            .then(accts => {
+                const total = accts.reduce((s,a) => s + parseFloat(a.balance), 0).toFixed(2);
+                document.querySelectorAll(".balance-amount").forEach(el => {
+                    el.textContent = `$${total}`;
+                });
+            })
+            .catch(console.error);
+
+        // 2) Profile (si existe el badge de profile)
+        fetch("/users/getAccounts", { method: "POST" })
+            .then(r => r.ok ? r.json() : Promise.reject("Error"))
+            .then(accts => {
+                const total = accts.reduce((s,a) => s + parseFloat(a.balance), 0).toFixed(2);
+                const prof = document.getElementById("profile-balance");
+                if (prof) prof.textContent = `$${total}`;
+            })
+            .catch(console.error);
+    }
+
+
     async function getAccounts() {
         try {
             const response = await fetch("/users/getAccounts", {
@@ -527,6 +552,26 @@ Content js-->
 
                 });
 
+            document.getElementById("deposit-form")?.addEventListener("submit", e => {
+                e.preventDefault();
+                const accountDestiny = +document.getElementById("selectPurse2").value;
+                const amount        = parseFloat(document.getElementById("depositAmount").value);
+                if (!accountDestiny || !amount) return alert("Completa todos los campos");
+
+                fetch(`/transaction/deposit?depositAmount=${amount}&accountOriginNumber=<TU_ORIGIN_ID>&accountDestiny=${accountDestiny}`, {
+                    method: "POST"
+                })
+                    .then(r => r.ok ? r.json() : r.text().then(t=>Promise.reject(t)))
+                    .then(_ => {
+                        refreshBalances();                    // 🟢 recalcula balance
+                        bootstrap.Modal.getInstance(
+                            document.getElementById("deposit-modal")
+                        ).hide();
+                        loadView("home");                    // o donde quieras volver
+                    })
+                    .catch(err => alert(err));
+            });
+
             document.getElementById("send-link")?.addEventListener("click", async (e) => {
                 e.preventDefault();
 
@@ -606,15 +651,42 @@ Content js-->
 
             });
 
+            document.getElementById("send-form")?.addEventListener("submit", e => {
+                e.preventDefault();
+                const accountNumber   = +document.getElementById("inputDestinyAccount").value;
+                const accountOriginId = +document.getElementById("selectPurse").value;
+                const amount          = parseFloat(document.getElementById("inputAmount").value);
+                const description     = document.getElementById("inputDescription").value;
+                const category        = document.getElementById("selectCategory").value;
+
+                if (!accountNumber || !accountOriginId || !amount || !category) {
+                    return alert("Completa todos los campos");
+                }
+
+                fetch(`/transaction/send?accountNumber=${accountNumber}`
+                    + `&amount=${amount}`
+                    + `&description=${encodeURIComponent(description)}`
+                    + `&accountOriginId=${accountOriginId}`
+                    + `&category=${category}`, {
+                    method: "POST"
+                })
+                    .then(r => r.ok ? r.json() : r.text().then(t=>Promise.reject(t)))
+                    .then(_ => {
+                        refreshBalances();                    // 🟢 recalcula balance
+                        bootstrap.Modal.getInstance(
+                            document.getElementById("send-money-modal")
+                        ).hide();
+                        loadView("home");                    // o donde quieras volver
+                    })
+                    .catch(err => alert(err));
+            });
+
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
                 e.preventDefault();
                 loadView("bank_accounts");
-
             });
 
-
             if (view === "home") {
-
                 fetch("/users/getAccounts", { method: "POST" })
                     .then(res => {
                         if (!res.ok) throw new Error("Error fetching accounts");
@@ -624,6 +696,7 @@ Content js-->
                         // sumo los balances de todas las cuentas
                         const total = accts.reduce((sum, a) => sum + parseFloat(a.balance), 0);
                         // muestro en el panel
+                        refreshBalances();
                         document.querySelector(".balance-amount").textContent = `$${total.toFixed(2)}`;
                     })
                     .catch(err => console.error("Error loading balance:", err));
@@ -693,7 +766,13 @@ Content js-->
                                     amountClass = "";
                             }
 
-                            const sign = (tx.type === "WITHDRAWAL") ? "-" : "+";
+                            let sign = "+";
+                            if (tx.type === "WITHDRAWAL" || tx.type === "TRANSFER") {
+                                sign = "-";
+                            } else if (tx.type === "RECEIVED" || tx.type === "DEPOSIT") {
+                                sign = "+";
+                            }
+
                             const absAmt = Math.abs(tx.amount).toFixed(2);
 
                             return `
@@ -796,20 +875,28 @@ Content js-->
                                 const tipo = {
                                     DEPOSIT:    "Deposit",
                                     WITHDRAWAL: "Withdrawal",
-                                    TRANSFER:   "Transfer"
+                                    TRANSFER:   "Transfer",
+                                    RECEIVED:   "Received"
                                 }[tx.type] || tx.type;
 
-                                // Clase de color según tipo
                                 let amountClass;
                                 switch (tx.type) {
                                     case "DEPOSIT":    amountClass = "text-success"; break;
                                     case "WITHDRAWAL": amountClass = "text-danger";  break;
                                     case "TRANSFER":   amountClass = "text-warning"; break;
+                                    case "RECEIVED":   amountClass = "text-info";    break;
                                     default:           amountClass = "";
                                 }
 
-                                const sign = (tx.type === "WITHDRAWAL") ? "-" : "+";
+                                let sign = "+";
+                                if (tx.type === "WITHDRAWAL" || tx.type === "TRANSFER") {
+                                    sign = "-";
+                                } else if (tx.type === "RECEIVED" || tx.type === "DEPOSIT") {
+                                    sign = "+";
+                                }
+
                                 const absAmt = Math.abs(tx.amount).toFixed(2);
+
 
                                 return `
               <tr>
@@ -964,6 +1051,7 @@ Content js-->
                         .then(r => r.json())
                         .then(newBal => {
                             document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
+                            refreshBalances();
                             loadView("wallets");
                             bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
                         })
@@ -980,6 +1068,7 @@ Content js-->
                         })
                         .then(newBal => {
                             document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
+                            refreshBalances();
                             loadView("wallets");
                             bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
                         })
@@ -991,6 +1080,7 @@ Content js-->
                     const walletId = document.getElementById("wallet-manage-form").dataset.walletId;
                     fetch(`/wallets/${walletId}`, { method: "DELETE" })
                         .then(() => {
+                            refreshBalances();
                             loadView("wallets");
                             bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
                         });
