@@ -121,6 +121,50 @@ public class TransactionController {
     }
 
 
+    @PostMapping("/withdraw")
+    @ResponseBody
+    public ResponseEntity<?> withdraw(
+            HttpSession session,
+            @RequestParam Long accountId,
+            @RequestParam BigDecimal amount
+    ) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        // 1) Cargar la cuenta
+        AccountEntity acct = accountRepository.findById(accountId).orElse(null);
+        if (acct == null) {
+            return ResponseEntity.status(404).body("Account not found");
+        }
+
+        // 2) Validar fondos
+        if (acct.getBalance().compareTo(amount) < 0) {
+            return ResponseEntity.status(400).body("Insufficient funds");
+        }
+
+        // 3) Ajuste de balance
+        acct.setBalance(acct.getBalance().subtract(amount));
+
+        // 4) Persistir el cambio
+        accountRepository.save(acct);
+
+        // 5) Registrar la transacción
+        TransactionDTO dto = new TransactionDTO();
+        dto.setAmount(amount);
+        dto.setDescription("WITHDRAWAL");
+        dto.setType("WITHDRAWAL");
+        dto.setDate(LocalDateTime.now());
+        dto.setDestination(String.valueOf(acct.getAccountNumber()));
+        dto.setCategory(Category.OTHER);
+        transactionService.saveTransaction(dto, user.getId(), acct.getId());
+
+        // 6) Responder con el nuevo balance
+        return ResponseEntity.ok(acct.getBalance());
+    }
+
+
     @GetMapping("/recent")
     @ResponseBody
     public List<TransactionDTO> recent(HttpSession session) {
@@ -185,8 +229,6 @@ public class TransactionController {
         response.put("status", "success");
         response.put("message", "Transaction saved successfully");
         return ResponseEntity.ok(response);
-
-
     }
 
 
