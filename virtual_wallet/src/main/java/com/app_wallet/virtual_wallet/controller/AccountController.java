@@ -5,6 +5,7 @@ import com.app_wallet.virtual_wallet.dto.UserDTO;
 import com.app_wallet.virtual_wallet.service.AccountService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addAccount(@RequestParam Long accountNumber, HttpSession session){
+    public ResponseEntity<String> addAccount(@RequestParam Long accountNumber, HttpSession session){
 
         UserDTO user = (UserDTO) session.getAttribute("user");
         if (user == null) {
@@ -38,10 +39,7 @@ public class AccountController {
 
         accountService.saveAccount(dto);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "Account created successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok("Account created successfully");
     }
 
 }

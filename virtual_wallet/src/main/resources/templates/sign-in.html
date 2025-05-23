@@ -137,6 +137,7 @@
         }
     }
 </script>
+
 <script>
     document.getElementById("register-form").addEventListener("submit", function (e) {
         e.preventDefault();
@@ -162,7 +163,6 @@
                 const registerModal = bootstrap.Modal.getInstance(document.getElementById("register-modal"));
                 registerModal.hide();
 
-                // Mostrar modal de éxito
                 const successModal = new bootstrap.Modal(document.getElementById("successModal"));
                 successModal.show();
 
