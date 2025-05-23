@@ -903,13 +903,13 @@ Content js-->
                     // 2a) Tabla de wallets con botón Manage
                     const tbody = document.getElementById("wallet-table-body");
                     tbody.innerHTML = list2.map(w => `
-          <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
-            <td>${w.name}</td>
-            <td>$${parseFloat(w.balance).toFixed(2)}</td>
-            <td>
-              <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
-            </td>
-          </tr>
+                      <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
+                        <td>${w.name}</td>
+                        <td>$${parseFloat(w.balance).toFixed(2)}</td>
+                        <td>
+                          <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
+                        </td>
+                      </tr>
         `).join("");
 
                     // 2b) Listado y selects para conexión
