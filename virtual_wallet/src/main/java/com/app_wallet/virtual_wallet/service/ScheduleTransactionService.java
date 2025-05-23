@@ -51,6 +51,9 @@ public class ScheduleTransactionService {
             accountRepository.save(originAccount);
             accountRepository.save(destinationAccount);
 
+            tx.setExecuted(true);
+            repository.save(tx);
+
             TransactionDTO dto = new TransactionDTO();
             dto.setDestination(tx.getUserDestiny());
             dto.setAmount(tx.getAmount());
@@ -80,8 +83,7 @@ public class ScheduleTransactionService {
             notificationService.sendSMS(user.getPhone(), "BLINKER: "+ user.getName() + ", you send " + "$"+amount+ " to " + destinationUser.getName());
 
          */
-            tx.setExecuted(true);
-            repository.save(tx);
+
         }
     }
 }

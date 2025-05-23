@@ -38,26 +38,12 @@ public class TransactionService {
 
     @Transactional
     public void saveTransaction(TransactionDTO dto, Long userId, Long accountOriginId) {
+
         TransactionEntity entity = TransactionMapper.toEntity(dto, userId, accountOriginId);
         transactionRepository.save(entity);
         pointsService.addPointsForTransaction(userId, dto.getType(), dto.getAmount());
-        if ("TRANSFER".equalsIgnoreCase(dto.getType())) {
-            Long sourceWalletId = accountOriginId;
-            Long targetWalletId;
-            try {
-                targetWalletId = Long.parseLong(dto.getDestination());
-            } catch (NumberFormatException ex) {
-                throw new IllegalArgumentException("Destino inválido para transferencia: " + dto.getDestination());
-            }
 
-            WalletConnectionEntity conn = new WalletConnectionEntity();
-            conn.setUserId(userId);
-            conn.setSourceWalletId(sourceWalletId);
-            conn.setTargetWalletId(targetWalletId);
 
-            walletConnectionRepository.save(conn);
-            walletGraphService.buildGraph(userId);
-        }
     }
 
     public LinkedList<TransactionDTO> getRecentTransactions(Long userId) {
