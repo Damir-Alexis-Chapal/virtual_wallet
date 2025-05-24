@@ -158,6 +158,18 @@ Content js-->
                 if (prof) prof.textContent = `$${total}`;
             })
             .catch(console.error);
+
+        // 3) Wallets
+        fetch(`/wallets?userId=${user.id}`)
+            .then(r => r.ok ? r.json() : Promise.reject("Error wallets"))
+            .then(ws => {
+                const totalWallets = ws.reduce((sum, w) => sum + parseFloat(w.balance), 0).toFixed(2);
+                // por ejemplo, muestra en un badge o en la misma .balance-amount:
+                document.querySelectorAll(".balance-amount").forEach(el => {
+                    el.textContent = `$${totalWallets}`;
+                });
+            })
+            .catch(console.error);
     }
 
 
@@ -484,6 +496,7 @@ Content js-->
 
         function loadView(view) {
             content.innerHTML = views[view] || "<h2>Not Found</h2>";
+            refreshBalances();
 
             // 1) Modales de depósito y envío
             document.getElementById("deposit-link")
@@ -535,13 +548,11 @@ Content js-->
                 fetch(`/transaction/deposit?depositAmount=${amount}&accountOriginNumber=<TU_ORIGIN_ID>&accountDestiny=${accountDestiny}`, {
                     method: "POST"
                 })
-                    .then(r => r.ok ? r.json() : r.text().then(t=>Promise.reject(t)))
+                    .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
                     .then(_ => {
-                        refreshBalances();                    // 🟢 recalcula balance
-                        bootstrap.Modal.getInstance(
-                            document.getElementById("deposit-modal")
-                        ).hide();
-                        loadView("home");                    // o donde quieras volver
+                        refreshBalances();
+                        bootstrap.Modal.getInstance(document.getElementById("deposit-modal")).hide();
+                        loadView("home");
                     })
                     .catch(err => alert(err));
             });
@@ -661,19 +672,6 @@ Content js-->
             });
 
             if (view === "home") {
-                fetch("/users/getAccounts", { method: "POST" })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Error fetching accounts");
-                        return res.json();
-                    })
-                    .then(accts => {
-                        // sumo los balances de todas las cuentas
-                        const total = accts.reduce((sum, a) => sum + parseFloat(a.balance), 0);
-                        // muestro en el panel
-                        refreshBalances();
-                        document.querySelector(".balance-amount").textContent = `$${total.toFixed(2)}`;
-                    })
-                    .catch(err => console.error("Error loading balance:", err));
                 // 1) navegación a Movements
                 document.getElementById("see-history")?.addEventListener("click", e => {
                     e.preventDefault();
@@ -787,15 +785,6 @@ Content js-->
                             `${accumulatedPoints} / ${maxPts} pts`;
                     })
                     .catch(err => console.error("Error loading profile points:", err));
-
-                fetch("/users/getAccounts", { method: "POST" })
-                    .then(res => res.ok ? res.json() : Promise.reject("Error fetching accounts"))
-                    .then(accts => {
-                        // sumamos todos los balances
-                        const total = accts.reduce((sum, acct) => sum + parseFloat(acct.balance), 0);
-                        document.getElementById("profile-balance").textContent = `$${total.toFixed(2)}`;
-                    })
-                    .catch(console.error);
             }
 
             if (view === "history") {
@@ -903,22 +892,22 @@ Content js-->
                     // 2a) Tabla de wallets con botón Manage
                     const tbody = document.getElementById("wallet-table-body");
                     tbody.innerHTML = list2.map(w => `
-                      <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
-                        <td>${w.name}</td>
-                        <td>$${parseFloat(w.balance).toFixed(2)}</td>
-                        <td>
-                          <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
-                        </td>
-                      </tr>
+          <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
+            <td>${w.name}</td>
+            <td>$${parseFloat(w.balance).toFixed(2)}</td>
+            <td>
+              <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
+            </td>
+          </tr>
         `).join("");
 
                     // 2b) Listado y selects para conexión
                     const ul = document.getElementById("wallet-list");
                     ul.innerHTML = list.map(w =>
                         `<li data-id="${w.id}" data-name="${w.name}" data-balance="${w.balance}"
-           class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
-         ${w.name} — $${parseFloat(w.balance).toFixed(2)}
-       </li>`
+       class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
+     ${w.name} — $${parseFloat(w.balance).toFixed(2)}
+   </li>`
                     ).join("");
 
                     const src = document.getElementById("source-wallet"),
@@ -939,11 +928,10 @@ Content js-->
                         }
                     });
 
-
                     // 3) Attach click en cada Manage
                     document.querySelectorAll(".manage-wallet-btn").forEach(btn => {
-                        btn.addEventListener("click", e => {
-                            const tr = e.currentTarget.closest("tr");
+                        btn.addEventListener("click", async e => {
+                            const tr   = e.currentTarget.closest("tr");
                             const id   = tr.dataset.walletId;
                             const name = tr.dataset.walletName;
                             const bal  = tr.dataset.walletBalance;
@@ -957,29 +945,131 @@ Content js-->
                             const form = document.getElementById("wallet-manage-form");
                             form.dataset.walletId = id;
 
+                            // Cargar cuentas bancarias
+                            try {
+                                const resp = await fetch("/users/getAccounts", { method: "POST" });
+                                if (!resp.ok) throw new Error("No pude cargar cuentas bancarias");
+                                const accounts = await resp.json();
+
+                                // Llenar el <select>
+                                const bankSelect = document.getElementById("select-bank-account");
+                                bankSelect.innerHTML = `<option value="" disabled selected>Select your bank account</option>`;
+                                accounts.forEach(ac => {
+                                    const opt = document.createElement("option");
+                                    opt.value = ac.id;
+                                    opt.textContent = `Acct #${ac.accountNumber} — $${parseFloat(ac.balance).toFixed(2)}`;
+                                    bankSelect.appendChild(opt);
+                                });
+
+                                // Limpiar event listeners previos para evitar duplicados
+                                const btnDeposit = document.getElementById("btn-deposit");
+                                const btnWithdraw = document.getElementById("btn-withdraw");
+
+                                // Crear nuevos clones para limpiar listeners
+                                const newBtnDeposit = btnDeposit.cloneNode(true);
+                                const newBtnWithdraw = btnWithdraw.cloneNode(true);
+                                btnDeposit.parentNode.replaceChild(newBtnDeposit, btnDeposit);
+                                btnWithdraw.parentNode.replaceChild(newBtnWithdraw, btnWithdraw);
+
+                                // DEPOSIT: pasa de la cuenta bancaria a la wallet
+                                newBtnDeposit.addEventListener("click", async () => {
+                                    const walletId  = form.dataset.walletId;
+                                    const accountId = bankSelect.value;
+                                    const amount    = parseFloat(document.getElementById("manage-amount").value);
+
+                                    if (!accountId || !amount || amount <= 0) {
+                                        alert("Selecciona cuenta y monto válido");
+                                        return;
+                                    }
+
+                                    try {
+                                        const res = await fetch(
+                                            `/wallets/${walletId}/deposit?amount=${amount}&accountId=${accountId}`,
+                                            { method: "POST" }
+                                        );
+
+                                        if (!res.ok) {
+                                            const errorText = await res.text();
+                                            throw new Error(errorText);
+                                        }
+
+                                        const result = await res.text();
+                                        alert(result || "Deposit successful!");
+
+                                        // Cerrar modal y recargar vista
+                                        bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
+                                        refreshBalances();
+                                        loadView("wallets");
+                                    } catch (error) {
+                                        alert("Error during deposit: " + error.message);
+                                    }
+                                });
+
+                                // WITHDRAW: pasa de la wallet a la cuenta bancaria
+                                newBtnWithdraw.addEventListener("click", async () => {
+                                    const walletId  = form.dataset.walletId;
+                                    const accountId = bankSelect.value;
+                                    const amount    = parseFloat(document.getElementById("manage-amount").value);
+
+                                    if (!accountId || !amount || amount <= 0) {
+                                        alert("Selecciona cuenta y monto válido");
+                                        return;
+                                    }
+
+                                    try {
+                                        const res = await fetch(
+                                            `/wallets/${walletId}/withdraw?amount=${amount}&accountId=${accountId}`,
+                                            { method: "POST" }
+                                        );
+
+                                        if (!res.ok) {
+                                            const errorText = await res.text();
+                                            throw new Error(errorText);
+                                        }
+
+                                        const result = await res.text();
+                                        alert(result || "Withdrawal successful!");
+
+                                        // Cerrar modal y recargar vista
+                                        bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
+                                        refreshBalances();
+                                        loadView("wallets");
+                                    } catch (error) {
+                                        alert("Error during withdrawal: " + error.message);
+                                    }
+                                });
+
+                            } catch (error) {
+                                console.error("Error loading accounts:", error);
+                                alert("Error loading bank accounts");
+                            }
+
                             // Mostrar modal
                             new bootstrap.Modal(document.getElementById("wallet-modal")).show();
                         });
                     });
+
                 }).catch(console.error);
 
+                // Event listeners para otras funciones
                 document.getElementById("wallet-transfer-form").addEventListener("submit", e => {
                     e.preventDefault();
-                    const from = document.getElementById("wallet-from").value;
-                    const to = document.getElementById("wallet-to").value;
+                    const from   = document.getElementById("wallet-from").value;
+                    const to     = document.getElementById("wallet-to").value;
                     const amount = document.getElementById("wallet-transfer-amount").value;
 
                     if (!from || !to || !amount || from === to) return alert("Check input values");
 
-                    fetch(`/wallets/transfer?fromWalletId=${from}&toWalletId=${to}&amount=${amount}`, {
-                        method: "POST"
-                    }).then(r => {
-                        if (!r.ok) return r.text().then(text => { throw new Error(text) });
-                        return r.text();
-                    }).then(msg => {
-                        alert(msg);
-                        loadView("wallets");
-                    }).catch(err => alert(err.message));
+                    fetch(`/wallets/transfer?fromWalletId=${from}&toWalletId=${to}&amount=${amount}`, { method: "POST" })
+                        .then(r => {
+                            if (!r.ok) return r.text().then(text => { throw new Error(text) });
+                            return r.text();
+                        })
+                        .then(msg => {
+                            alert(msg);
+                            loadView("wallets");
+                        })
+                        .catch(err => alert(err.message));
                 });
 
                 // 4) Crear nueva wallet
@@ -1014,51 +1104,30 @@ Content js-->
                             JSON.stringify(map, null, 2);
                     });
 
-                // 7) Deposit & Withdraw dentro del modal
-                const form = document.getElementById("wallet-manage-form");
-                const amtInput = document.getElementById("manage-amount");
-                document.getElementById("btn-deposit").onclick = () => {
-                    const walletId = form.dataset.walletId;
-                    const amt = parseFloat(amtInput.value);
-                    if (!amt || amt <= 0) return alert("Enter a valid amount");
-                    fetch(`/wallets/${walletId}/deposit?amount=${amt}`, { method: "POST" })
-                        .then(r => r.json())
-                        .then(newBal => {
-                            document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
-                            refreshBalances();
-                            loadView("wallets");
-                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
-                        })
-                        .catch(console.error);
-                };
-                document.getElementById("btn-withdraw").onclick = () => {
-                    const walletId = form.dataset.walletId;
-                    const amt = parseFloat(amtInput.value);
-                    if (!amt || amt <= 0) return alert("Enter a valid amount");
-                    fetch(`/wallets/${walletId}/withdraw?amount=${amt}`, { method: "POST" })
-                        .then(r => {
-                            if (!r.ok) throw new Error("Insufficient funds");
-                            return r.json();
-                        })
-                        .then(newBal => {
-                            document.getElementById("modal-wallet-balance").textContent = parseFloat(newBal).toFixed(2);
-                            refreshBalances();
-                            loadView("wallets");
-                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
-                        })
-                        .catch(err => alert(err.message));
-                };
-
-                // 8) Delete Wallet
-                document.getElementById("wallet-delete-btn").onclick = e => {
+                // 7) Delete Wallet - Event listener único
+                document.getElementById("wallet-delete-btn").addEventListener("click", async () => {
                     const walletId = document.getElementById("wallet-manage-form").dataset.walletId;
-                    fetch(`/wallets/${walletId}`, { method: "DELETE" })
-                        .then(() => {
+                    if (!walletId) {
+                        alert("No wallet selected");
+                        return;
+                    }
+
+                    if (confirm("Are you sure you want to delete this wallet?")) {
+                        try {
+                            const response = await fetch(`/wallets/${walletId}`, { method: "DELETE" });
+                            if (!response.ok) {
+                                throw new Error("Failed to delete wallet");
+                            }
+
+                            alert("Wallet deleted successfully");
+                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
                             refreshBalances();
                             loadView("wallets");
-                            bootstrap.Modal.getInstance(document.getElementById("wallet-modal")).hide();
-                        });
-                };
+                        } catch (error) {
+                            alert("Error deleting wallet: " + error.message);
+                        }
+                    }
+                });
             }
 
 
@@ -1299,13 +1368,35 @@ Content js-->
                 <p><strong>Name:</strong> <span id="modal-wallet-name"></span></p>
                 <p><strong>Balance:</strong> $<span id="modal-wallet-balance">0.00</span></p>
                 <form id="wallet-manage-form">
+                    <!-- selector de cuenta bancaria -->
+                    <div class="mb-3">
+                        <label for="select-bank-account" class="form-label">From / To Bank Account</label>
+                        <select id="select-bank-account" class="form-select bg-dark text-white" required>
+                            <option value="" disabled selected>Select your bank account</option>
+                        </select>
+                    </div>
+
+                    <!-- importe -->
                     <div class="mb-3">
                         <label for="manage-amount" class="form-label">Amount</label>
                         <input type="number" step="0.01" class="form-control bg-dark text-white" id="manage-amount" />
                     </div>
+                    <!-- botones de acción -->
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-warning w-100" id="btn-withdraw">Withdraw</button>
-                        <button type="button" class="btn btn-success w-100" id="btn-deposit">Deposit</button>
+                        <button
+                                type="button"
+                                class="btn btn-warning w-50"
+                                id="btn-withdraw"
+                        >
+                            Withdraw
+                        </button>
+                        <button
+                                type="button"
+                                class="btn btn-success w-50"
+                                id="btn-deposit"
+                        >
+                            Deposit
+                        </button>
                     </div>
                 </form>
             </div>

@@ -7,9 +7,11 @@ import com.app_wallet.virtual_wallet.entity.UserEntity;
 import com.app_wallet.virtual_wallet.mapper.AccountMapper;
 import com.app_wallet.virtual_wallet.repository.AccountRepository;
 import com.app_wallet.virtual_wallet.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,5 +48,26 @@ public class AccountService {
         return entities.stream()
                 .map(AccountMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BigDecimal depositToAccount(Long accountId, BigDecimal amount) {
+        AccountEntity acct = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalStateException("Account not found: " + accountId));
+        acct.setBalance(acct.getBalance().add(amount));
+        accountRepository.save(acct);
+        return acct.getBalance();
+    }
+
+    @Transactional
+    public BigDecimal withdrawFromAccount(Long accountId, BigDecimal amount) {
+        AccountEntity acct = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalStateException("Account not found: " + accountId));
+        if (acct.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient funds in real account");
+        }
+        acct.setBalance(acct.getBalance().subtract(amount));
+        accountRepository.save(acct);
+        return acct.getBalance();
     }
 }

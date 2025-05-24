@@ -27,46 +27,38 @@ public class WalletService {
     WalletEntity w = new WalletEntity();
     w.setUserId(userId);
     w.setName(name);
+    w.setAmount(BigDecimal.ZERO);
     return walletRepo.save(w);
   }
 
   public List<WalletResponse> listWithBalance(Long userId) {
     return walletRepo.findAllByUserId(userId)
             .stream()
-            .map(w -> {
-              BigDecimal bal = accountRepo.findByWalletId(w.getId())
-                      .stream()
-                      .map(a -> a.getBalance())
-                      .reduce(BigDecimal.ZERO, BigDecimal::add);
-              return new WalletResponse(w.getId(), w.getName(), bal);
-            })
+            .map(w -> new WalletResponse(w.getId(), w.getName(), w.getAmount()))
             .toList();
   }
 
   @Transactional
   public BigDecimal deposit(Long walletId, BigDecimal amount) {
-    // Para simplificar: asumo que cada wallet tiene una sola "cuenta" interna
-    // o usamos la primera de la lista
-    AccountEntity acct = accountRepo.findByWalletId(walletId)
-            .stream().findFirst()
-            .orElseThrow(() -> new IllegalStateException("No account for wallet " + walletId));
-    acct.setBalance(acct.getBalance().add(amount));
-    accountRepo.save(acct);
-    return acct.getBalance();
+    WalletEntity w = walletRepo.findById(walletId)
+            .orElseThrow(() -> new IllegalStateException("Wallet no encontrada: " + walletId));
+    w.setAmount(w.getAmount().add(amount));
+    walletRepo.save(w);
+    return w.getAmount();
   }
 
   @Transactional
   public BigDecimal withdraw(Long walletId, BigDecimal amount) {
-    AccountEntity acct = accountRepo.findByWalletId(walletId)
-            .stream().findFirst()
-            .orElseThrow(() -> new IllegalStateException("No account for wallet " + walletId));
-    if (acct.getBalance().compareTo(amount) < 0) {
-      throw new IllegalArgumentException("Insufficient funds");
+    WalletEntity w = walletRepo.findById(walletId)
+            .orElseThrow(() -> new IllegalStateException("Wallet no encontrada: " + walletId));
+    if (w.getAmount().compareTo(amount) < 0) {
+      throw new IllegalArgumentException("Fondos insuficientes");
     }
-    acct.setBalance(acct.getBalance().subtract(amount));
-    accountRepo.save(acct);
-    return acct.getBalance();
+    w.setAmount(w.getAmount().subtract(amount));
+    walletRepo.save(w);
+    return w.getAmount();
   }
+
 
   @Transactional
   public void transfer(Long fromWalletId, Long toWalletId, BigDecimal amount) {
@@ -89,4 +81,20 @@ public class WalletService {
     accountRepo.save(from);
     accountRepo.save(to);
   }
+
+  @Transactional
+  public void deleteWallet(Long walletId) {
+    // Verificar que la wallet existe
+    WalletEntity wallet = walletRepo.findById(walletId)
+            .orElseThrow(() -> new IllegalArgumentException("Wallet not found with id: " + walletId));
+
+    // Opcional: Verificar que la wallet tenga balance 0 antes de eliminar
+    if (wallet.getAmount().compareTo(BigDecimal.ZERO) != 0) {
+      throw new IllegalArgumentException("Cannot delete wallet with non-zero balance. Current balance: " + wallet.getAmount());
+    }
+
+    // Eliminar la wallet
+    walletRepo.deleteById(walletId);
+  }
+
 }
