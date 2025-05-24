@@ -92,9 +92,6 @@
     </style>
 </head>
 <body>
-
-
-
 <!-- Sidebar -->
 <div class="sidebar custom-sidebar">
     <h4 class="text-center">Blinker</h4>
@@ -103,6 +100,7 @@
         <li class="nav-item"><a href="#" class="nav-link" data-section="home"><i class="bi bi-house-door-fill me-2"></i>Home</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="profile"><i class="bi bi-person-fill me-2"></i>Profile</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="wallets"><i class="bi bi-diagram-3-fill me-2"></i>Wallets</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="point_store"><i class="bi bi-shop me-2"></i>Point Store</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="history"><i class="bi bi-clock-history me-2"></i>History</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="statistics"><i class="bi bi-bar-chart-fill me-2"></i>Statistics</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="settings"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>
@@ -114,12 +112,50 @@
         </li>
     </ul>
 </div>
+<!-- Main content -->
+<div class="content">
+    <div id="main-content" class="container mt-4">
+        <h1 class="mb-4">Balance Dashboard</h1>
+
+        <!-- Balance Card -->
+        <div class="card custom-card mb-4">
+            <h3>Current Balance</h3>
+            <p class="balance-amount">$0.00</p>
+            <span class="badge bg-success">+0 pts</span>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+                <button class="btn btn-primary px-4" id="send-link">
+                    <i class="bi bi-send-fill me-2"></i>Send
+                </button>
+                <button class="btn btn-success px-4" id="deposit-link">
+                    <i class="bi bi-wallet2 me-2"></i>Deposit
+                </button>
+                <button class="btn btn-warning px-4" id="withdraw-link">
+                    <i class="bi bi-cash-stack me-2"></i>Withdraw
+                </button>
+                <button class="btn btn-info px-4" id="btn-bank-accounts">
+                    <i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts
+                </button>
+            </div>
+        </div>
+
+        <!-- Transactions History -->
+        <div class="card custom-card">
+            <h3 class="mb-3">Movements</h3>
+            <!-- Aquí meteremos las 3 más recientes -->
+            <div id="recent-transactions"></div>
+            <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">See all movements</a>
+        </div>
+
+    </div>
+</div>
 
 
 <script>
     let cuentas = [];
     let user = null;
-    //funcion oara llenar al usuario
+    //funcion para llenar al usuario
     async function fetchCurrentUser() {
         try {
             const res = await fetch("/users/me", {
@@ -176,31 +212,77 @@
             })
             .catch(console.error);
     }
-
-
-    async function getAccounts() {
-        try {
-            const response = await fetch("/users/getAccounts", {
+    //funcion para obtener las cuentas
+        async function getAccounts() {
+            try {
+                const response = await fetch("/users/getAccounts", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    credentials: "include"
+                });
+                if (!response.ok) {
+                    throw new Error("Error al obtener las cuentas");
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Error:", error);
+                return [];
+            }
+        }
+    //funcion para obtener las cuentas 2
+        function loadUserAccounts() {
+            fetch("/users/getAccounts", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 credentials: "include"
-            });
-            if (!response.ok) {
-                throw new Error("Error al obtener las cuentas");
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error("Error:", error);
-            return [];
+            })
+                .then(r => r.json())
+                .then(data => {
+                    const list = document.getElementById("bank-accounts-list");
+                    if (!list) return;
+                    list.innerHTML = data.length
+                        ? data.map(account => `
+                <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Account #${account.id}</strong><br>
+                        Number: ${account.accountNumber}
+                    </div>
+                    <span class="badge bg-primary rounded-pill">$${account.balance.toFixed(2)}</span>
+                </li>
+            `).join("") : `<li class="list-group-item bg-dark text-light text-center">No accounts yet.</li>`;
+                });
         }
-    }
+
+        //funcion para obtener las cuentas 3
+        function updateBalanceAmount() {
+            fetch("/users/getAccounts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            })
+                .then(res => res.json())
+                .then(accounts => {
+                    const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+                    const balanceElem = document.querySelector(".balance-amount");
+                    if (balanceElem) {
+                        balanceElem.textContent = `$${total.toFixed(2)}`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching accounts to update balance:", err);
+                });
+        }
+
+
 
     async function init() {
-        cuentas = await getAccounts();
-    }
-    init();
+            cuentas = await getAccounts();
+        }
+        init();
     document.addEventListener("DOMContentLoaded", () => {
 
+        if (document.querySelector(".balance-amount")) {
+            updateBalanceAmount();
+        }
         const content = document.getElementById("main-content");
         const logoutLink = document.getElementById("logout-link");
 
@@ -263,121 +345,120 @@
                 </div>
   `,
             profile: `
-    <div class="settings-container">
-      <h2 class="mb-4">Profile</h2>
+                <div class="settings-container">
+                  <h2 class="mb-4">Profile</h2>
 
-      <!-- User Information -->
-      <div class="card custom-card mb-4">
-        <h4 class="mb-3">User Information</h4>
-        <div class="col-md-4 fw-bold">Name:</div>
-        <div class="col-md-8" id="profile-user-name">Loading...</div>
-        <div class="col-md-4 fw-bold">Email:</div>
-        <div class="col-md-8" id="profile-user-email">Loading...</div>
-        <div class="row mb-3">
-          <div class="col-md-4 fw-bold">Total Balance:</div>
-          <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
-        </div>
-      </div>
+                  <!-- User Information -->
+                  <div class="card custom-card mb-4">
+                    <h4 class="mb-3">User Information</h4>
+                    <div class="col-md-4 fw-bold">Name:</div>
+                    <div class="col-md-8" id="profile-user-name">Loading...</div>
+                    <div class="col-md-4 fw-bold">Email:</div>
+                    <div class="col-md-8" id="profile-user-email">Loading...</div>
+                    <div class="row mb-3">
+                      <div class="col-md-4 fw-bold">Total Balance:</div>
+                      <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
+                    </div>
+                  </div>
 
-      <!-- User Rank in Profile -->
-      <div class="card custom-card mb-4">
-        <div class="d-flex align-items-center mb-3">
-          <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
-          <h4 class="mb-0">Your Rank</h4>
-        </div>
-        <div class="d-flex align-items-center mb-2">
-          <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronze</span>
-          <div class="flex-grow-1">
-            <div class="progress" style="height: .6rem;">
-              <div id="profile-rank-progress"
-                   class="progress-bar bg-warning"
-                   role="progressbar"
-                   style="width: 0%;"
-                   aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-              </div>
-            </div>
-            <small id="profile-rank-text" style="color: white;">0 / 500 pts</small>
-          </div>
-        </div>
-      </div>
+                  <!-- User Rank in Profile -->
+                  <div class="card custom-card mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
+                      <h4 class="mb-0">Your Rank</h4>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronze</span>
+                      <div class="flex-grow-1">
+                        <div class="progress" style="height: .6rem;">
+                          <div id="profile-rank-progress"
+                               class="progress-bar bg-warning"
+                               role="progressbar"
+                               style="width: 0%;"
+                               aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                          </div>
+                        </div>
+                        <small id="profile-rank-text" style="color: white;">0 / 500 pts</small>
+                      </div>
+                    </div>
+                  </div>
 
-      <!-- Account Actions -->
-      <div class="card custom-card">
-        <h4 class="mb-3">Account Actions</h4>
-        <div class="d-flex gap-3">
-          <button class="btn btn-outline-light">
-            <i class="bi bi-pencil-fill me-2"></i>Edit Profile
-          </button>
-          <button class="btn btn-outline-danger">
-            <i class="bi bi-trash-fill me-2"></i>Delete Account
-          </button>
-        </div>
-      </div>
-    </div>
-  `,wallets: `
-  <div class="settings-container">
-    <h2 class="mb-4">My Wallets</h2>
+                  <!-- Account Actions -->
+                  <div class="card custom-card">
+                    <h4 class="mb-3">Account Actions</h4>
+                    <div class="d-flex gap-3">
+                      <button class="btn btn-outline-light">
+                        <i class="bi bi-pencil-fill me-2"></i>Edit Profile
+                      </button>
+                      <button class="btn btn-outline-danger">
+                        <i class="bi bi-trash-fill me-2"></i>Delete Account
+                      </button>
+                    </div>
+                  </div>
+                </div>
+  `,
+            wallets: `
+          <div class="settings-container">
+            <h2 class="mb-4">My Wallets</h2>
 
-    <div class="card custom-card mb-4">
-      <h4 class="mb-3">Create New Wallet</h4>
-      <form id="wallet-create-form">
-        <div class="mb-3">
-          <label for="wallet-name" class="form-label">Wallet Name</label>
-          <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
-                 placeholder="e.g. Savings" required>
-        </div>
-        <button type="submit" class="btn btn-success">Create Wallet</button>
-      </form>
-    </div>
-
-    <div class="card custom-card">
-      <h4 class="mb-3">Your Wallets</h4>
-      <div class="table-responsive">
-        <table class="table table-dark table-striped align-middle">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Balance</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="wallet-table-body"></tbody>
-        </table>
-      </div>
-
-      <h5 class="mt-4">All Wallets List (for graph connect)</h5>
-      <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
-
-
-      <h5 class="mt-4">Transfer Between Wallets</h5>
-        <form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
-          <select id="wallet-from" class="form-select bg-dark text-white">
-            <option value="">From</option>
-          </select>
-          <select id="wallet-to" class="form-select bg-dark text-white">
-            <option value="">To</option>
-          </select>
-          <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
-          <button type="submit" class="btn btn-warning">Transfer</button>
-        </form>
-              <h5>Connect Wallets</h5>
-              <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
-                <select id="source-wallet" class="form-select bg-dark text-white">
-                  <option value="">From</option>
-                </select>
-                <select id="target-wallet" class="form-select bg-dark text-white">
-                  <option value="">To</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Connect</button>
+            <div class="card custom-card mb-4">
+              <h4 class="mb-3">Create New Wallet</h4>
+              <form id="wallet-create-form">
+                <div class="mb-3">
+                  <label for="wallet-name" class="form-label">Wallet Name</label>
+                  <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
+                         placeholder="e.g. Savings" required>
+                </div>
+                <button type="submit" class="btn btn-success">Create Wallet</button>
               </form>
-
-              <h5>Graph Structure</h5>
-              <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
             </div>
-          </div>
-`
 
-            ,
+            <div class="card custom-card">
+              <h4 class="mb-3">Your Wallets</h4>
+              <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Balance</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="wallet-table-body"></tbody>
+                </table>
+              </div>
+
+              <h5 class="mt-4">All Wallets List (for graph connect)</h5>
+              <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
+
+
+              <h5 class="mt-4">Transfer Between Wallets</h5>
+                <form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
+                  <select id="wallet-from" class="form-select bg-dark text-white">
+                    <option value="">From</option>
+                  </select>
+                  <select id="wallet-to" class="form-select bg-dark text-white">
+                    <option value="">To</option>
+                  </select>
+                  <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
+                  <button type="submit" class="btn btn-warning">Transfer</button>
+                </form>
+                      <h5>Connect Wallets</h5>
+                      <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
+                        <select id="source-wallet" class="form-select bg-dark text-white">
+                          <option value="">From</option>
+                        </select>
+                        <select id="target-wallet" class="form-select bg-dark text-white">
+                          <option value="">To</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Connect</button>
+                      </form>
+
+                      <h5>Graph Structure</h5>
+                      <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
+                    </div>
+                  </div>
+        `,
             history: `
   <h2 class="mb-4">Movements</h2>
   <div class="card custom-card">
@@ -398,37 +479,36 @@
       </table>
     </div>
   </div>
-`,statistics: `
-  <div class="container mt-4">
-    <h2 class="mb-4">Statistics</h2>
+`,
+            statistics: `
+          <div class="container mt-4">
+            <h2 class="mb-4">Statistics</h2>
 
-    <!-- 1) Patrones por categoría -->
-    <div class="card custom-card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Spending Patterns by Category</h5>
-        <canvas id="categoryChart"></canvas>
-      </div>
-    </div>
+            <!-- 1) Patrones por categoría -->
+            <div class="card custom-card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Spending Patterns by Category</h5>
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
 
-    <!-- 2) Transferencias frecuentes -->
-    <div class="card custom-card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Frequent Transfer Targets</h5>
-        <canvas id="clientGraphChart"></canvas>
-      </div>
-    </div>
+            <!-- 2) Transferencias frecuentes -->
+            <div class="card custom-card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Frequent Transfer Targets</h5>
+                <canvas id="clientGraphChart"></canvas>
+              </div>
+            </div>
 
-    <!-- 3) Grupos de afinidad -->
-    <div class="card custom-card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Affinity Groups</h5>
-        <div id="affinity-groups" class="d-flex flex-column gap-2 text-light"></div>
-      </div>
-    </div>
-  </div>
-`
-            ,
-
+            <!-- 3) Grupos de afinidad -->
+            <div class="card custom-card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Affinity Groups</h5>
+                <div id="affinity-groups" class="d-flex flex-column gap-2 text-light"></div>
+              </div>
+            </div>
+          </div>
+        `,
             settings: `
                 <div class="settings-container">
                     <h2>Settings</h2>
@@ -479,6 +559,52 @@
                     </form>
                 </div>
 
+            `,
+            point_store: `
+            <div class="settings-container" id="point-store-section">
+              <h1 class="mb-4">Point Store</h1>
+
+              <!-- Active Benefit Card -->
+              <div class="card custom-card mb-4">
+                <h3>Active Benefit</h3>
+                <div class="mb-3">
+                  <label for="active-benefit" class="form-label">Current Benefit</label>
+                  <input type="text" class="form-control" id="active-benefit" placeholder="No active benefit" />
+                </div>
+              </div>
+
+              <!-- Total Points Card -->
+              <div class="card custom-card mb-4">
+                <h3>Total Points</h3>
+                <p class="balance-amount" id="total-points">0 pts</p>
+                <div class="d-flex justify-content-center mt-3">
+                  <button class="btn btn-warning px-4" id="redeem-points-btn">
+                    <i class="bi bi-stars me-2"></i>Redeem Points
+                  </button>
+                </div>
+              </div>
+
+              <!-- Point Items Store (Optional Store Section) -->
+              <div class="card custom-card">
+                <h3 class="mb-3">Available Rewards</h3>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="card bg-dark text-white p-3 h-100">
+                      <h5>Free Transaction</h5>
+                      <p>Redeem this to get one free transaction without fees.</p>
+                      <button class="btn btn-outline-success mt-auto w-100">Redeem - 100 pts</button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card bg-dark text-white p-3 h-100">
+                      <h5>Account Upgrade</h5>
+                      <p>Upgrade your user tier for better benefits.</p>
+                      <button class="btn btn-outline-success mt-auto w-100">Redeem - 300 pts</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             `
         };
 
@@ -500,7 +626,8 @@
         }
 
         function loadView(view) {
-            content.innerHTML = views[view] || "<h2>Not Found</h2>";
+            document.getElementById("main-content").innerHTML = views[view] || "<h2>Not Found</h2>";
+            console.log("Vista cargada:", view);
             refreshBalances();
 
             // 1) Modales de depósito y envío
@@ -679,20 +806,36 @@
                 }
             });
 
-
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
                 e.preventDefault();
                 loadView("bank_accounts");
             });
 
             if (view === "home") {
-                // 1) navegación a Movements
+                // Mostrar balance total en home
+                updateBalanceAmount();
+                fetch("/users/getAccounts", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include"
+                })
+                    .then(r => r.json())
+                    .then(accounts => {
+                        const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+                        const balanceElem = document.querySelector(".balance-amount");
+                        if (balanceElem) {
+                            balanceElem.textContent = `$${total.toFixed(2)}`;
+                        }
+                    })
+                    .catch(err => console.error("Error fetching accounts for balance:", err));
+
+                // Navegación a Movements
                 document.getElementById("see-history")?.addEventListener("click", e => {
                     e.preventDefault();
                     loadView("history");
                 });
 
-                // 2) fetch de rango y puntos
+                // Puntos y rango
                 fetch("/points/top?n=1")
                     .then(res => {
                         if (!res.ok) throw new Error("Network response was not ok");
@@ -703,7 +846,7 @@
                         const { accumulatedPoints, rangeUser } = data[0];
                         const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
                         const maxPts = limits[rangeUser] || 500;
-                        const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+                        const pct = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
 
                         document.getElementById("user-rank-badge").textContent =
                             rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
@@ -715,7 +858,7 @@
                     })
                     .catch(err => console.error("Error loading points:", err));
 
-                // 3) fetch de 3 transacciones recientes con tipado y colores
+                // Transacciones recientes
                 fetch("/transaction/recent")
                     .then(r => {
                         if (!r.ok) throw new Error("Error fetching recent transactions");
@@ -728,50 +871,43 @@
                             return;
                         }
                         container.innerHTML = data.map(tx => {
-                            // Traducir tipo y elegir icono + color
                             let iconClass, amountClass, tipoLabel;
                             switch (tx.type) {
                                 case "DEPOSIT":
-                                    tipoLabel   = "Depósito";
-                                    iconClass   = "bi-arrow-down-circle text-success";
+                                    tipoLabel = "Depósito";
+                                    iconClass = "bi-arrow-down-circle text-success";
                                     amountClass = "text-success";
                                     break;
                                 case "WITHDRAWAL":
-                                    tipoLabel   = "Retiro";
-                                    iconClass   = "bi-arrow-up-circle text-danger";
+                                    tipoLabel = "Retiro";
+                                    iconClass = "bi-arrow-up-circle text-danger";
                                     amountClass = "text-danger";
                                     break;
                                 case "TRANSFER":
-                                    tipoLabel   = "Transferencia";
-                                    iconClass   = "bi-arrow-right-circle text-warning";
+                                    tipoLabel = "Transferencia";
+                                    iconClass = "bi-arrow-right-circle text-warning";
                                     amountClass = "text-warning";
                                     break;
                                 default:
-                                    tipoLabel   = tx.type;
-                                    iconClass   = "bi-circle";
+                                    tipoLabel = tx.type;
+                                    iconClass = "bi-circle";
                                     amountClass = "";
                             }
 
-                            let sign = "+";
-                            if (tx.type === "WITHDRAWAL" || tx.type === "TRANSFER") {
-                                sign = "-";
-                            } else if (tx.type === "RECEIVED" || tx.type === "DEPOSIT") {
-                                sign = "+";
-                            }
-
+                            const sign = (tx.type === "WITHDRAWAL" || tx.type === "TRANSFER") ? "-" : "+";
                             const absAmt = Math.abs(tx.amount).toFixed(2);
 
                             return `
-        <div class="transaction-item d-flex justify-content-between align-items-center">
-          <span>
-            <i class="bi ${iconClass} me-2"></i>
-            ${tipoLabel}: ${tx.description || ""}
-          </span>
-          <span class="${amountClass}">
-            ${sign} $${absAmt}
-          </span>
-        </div>
-      `;
+                    <div class="transaction-item d-flex justify-content-between align-items-center">
+                      <span>
+                        <i class="bi ${iconClass} me-2"></i>
+                        ${tipoLabel}: ${tx.description || ""}
+                      </span>
+                      <span class="${amountClass}">
+                        ${sign} $${absAmt}
+                      </span>
+                    </div>
+                `;
                         }).join("");
                     })
                     .catch(err => console.error("Error loading recent transactions:", err));
@@ -1147,25 +1283,26 @@
                 });
             }
 
-            if (view === "bank_accounts" || view === "home") {
+            if (view === "bank_accounts") {
                 fetch("/users/getAccounts", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     credentials: "include"
                 })
                     .then(r => r.json())
                     .then(data => {
-
                         const list = document.getElementById("bank-accounts-list");
+                        if (!list) return;
                         list.innerHTML = data.length
                             ? data.map(account => `
-                    <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Account #${account.id}</strong><br>
-                            Number: ${account.accountNumber}
-                        </div>
-                        <span class="badge bg-primary rounded-pill">$${account.balance.toFixed(2)}</span>
-                    </li>
-                `).join("")
+                <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Account #${account.id}</strong><br>
+                        Number: ${account.accountNumber}
+                    </div>
+                    <span class="badge bg-primary rounded-pill">$${account.balance.toFixed(2)}</span>
+                </li>
+            `).join("")
                             : `<li class="list-group-item bg-dark text-light text-center">No accounts yet.</li>`;
                     });
 
@@ -1173,12 +1310,12 @@
                 if (accountForm) {
                     accountForm.addEventListener('submit', function (e) {
                         e.preventDefault();
-
                         const form = e.target;
                         const formData = new FormData(form);
 
                         fetch('/Accounts/add', {
-                            method: "POST", headers: { "Content-Type": "application/json" },
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
                             credentials: "include",
                             body: formData
                         })
@@ -1195,6 +1332,7 @@
                                     successModal.show();
                                 }
                                 form.reset();
+                                loadUserAccounts();
                             })
                             .catch(error => {
                                 alert("There was an error adding the account.");
@@ -1255,7 +1393,6 @@
                     }).catch(console.error);
             }
 
-
         }
 
         // Arranca en HOME
@@ -1278,6 +1415,7 @@
             .forEach(a => a.addEventListener("click", e => {
                 e.preventDefault();
                 loadView(a.dataset.section);
+
             }));
     });
 </script>
@@ -1528,34 +1666,6 @@
     </div>
 </div>
 
-<div class="content">
-    <div id="main-content" class="container mt-4">
-        <h1 class="mb-4">Balance Dashboard</h1>
-
-        <!-- Balance Card -->
-        <div class="card custom-card mb-4">
-            <h3>Current Balance</h3>
-            <p class="balance-amount">$0.00</p>
-            <span class="badge bg-success">+0 pts</span>
-
-            <!-- Action Buttons -->
-            <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
-                <button type="button" class="btn btn-primary px-4" id="send-link"><i class="bi bi-send-fill me-2"></i>Send</button>
-                <button type="button" class="btn btn-success px-4" id="deposit-link"><i class="bi bi-wallet2 me-2"></i>Deposit</button>
-                <button type="button" class="btn btn-info px-4" id="btn-bank-accounts"><i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts</button>
-            </div>
-        </div>
-
-        <!-- Transactions History -->
-        <div class="card custom-card">
-            <h3 class="mb-3">Movements</h3>
-            <!-- Aquí meteremos las 3 más recientes -->
-            <div id="recent-transactions"></div>
-            <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">See all movements</a>
-        </div>
-
-    </div>
-</div>
 <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-success text-white">
@@ -1628,6 +1738,7 @@
         }
     });
 </script>
+
 <script>
     fetch('/transaction/patterns/categories')
         .then(res => res.json())
