@@ -636,35 +636,7 @@ Content js-->
 
             });
 
-            document.getElementById("send-form")?.addEventListener("submit", e => {
-                e.preventDefault();
-                const accountNumber   = +document.getElementById("inputDestinyAccount").value;
-                const accountOriginId = +document.getElementById("selectPurse").value;
-                const amount          = parseFloat(document.getElementById("inputAmount").value);
-                const description     = document.getElementById("inputDescription").value;
-                const category        = document.getElementById("selectCategory").value;
 
-                if (!accountNumber || !accountOriginId || !amount || !category) {
-                    return alert("Completa todos los campos");
-                }
-
-                fetch(`/transaction/send?accountNumber=${accountNumber}`
-                    + `&amount=${amount}`
-                    + `&description=${encodeURIComponent(description)}`
-                    + `&accountOriginId=${accountOriginId}`
-                    + `&category=${category}`, {
-                    method: "POST"
-                })
-                    .then(r => r.ok ? r.json() : r.text().then(t=>Promise.reject(t)))
-                    .then(_ => {
-                        refreshBalances();                    // 🟢 recalcula balance
-                        bootstrap.Modal.getInstance(
-                            document.getElementById("send-money-modal")
-                        ).hide();
-                        loadView("home");                    // o donde quieras volver
-                    })
-                    .catch(err => alert(err));
-            });
 
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
                 e.preventDefault();
@@ -1355,7 +1327,6 @@ Content js-->
     </div>
 </div>
 
-
 <!-- Modal de Gestión de Wallet -->
 <div class="modal fade" id="wallet-modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -1625,12 +1596,15 @@ Content js-->
             errorDiv.style.display = 'none';
         }
 
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
 
         fetch('/transaction/send', {
             method: 'POST',
             body: formData
         })
             .then(response => {
+                submitButton.disabled = false;
                 if (!response.ok) {
                     throw new Error('Server error');
                 }
@@ -1639,6 +1613,8 @@ Content js-->
             .then(data => {
                 const modal = new bootstrap.Modal(document.getElementById('successModal'));
                 modal.show();
+
+                form.reset();
             })
             .catch(error => {
                 errorDiv.style.display = 'block';

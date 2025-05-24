@@ -85,6 +85,7 @@ public class TransactionController {
         accountRepository.save(destinationAccount);
 
         TransactionDTO dto = new TransactionDTO();
+
         dto.setAmount(amount);
         dto.setDescription(description);
         dto.setType("TRANSFER");
