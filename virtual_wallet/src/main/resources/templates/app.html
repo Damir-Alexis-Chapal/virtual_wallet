@@ -115,31 +115,35 @@
     </ul>
 </div>
 
-<!-- Content -->
-
-
-<!--
-/////////////
-////////////
-////////////
-///////////
-Content js-->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const userName = /*[[${user.name}]]*/ "Desconocido";
-    const userEmail = /*[[${user.email}]]*/ "Sin email";
-    const user = /*[[${user}]]*/ null;
-    console.log("User:", user);
-    /*]]>*/
-</script>
 
 <script>
     let cuentas = [];
+    let user = null;
+    //funcion oara llenar al usuario
+    async function fetchCurrentUser() {
+        try {
+            const res = await fetch("/users/me", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(msg);
+            }
+
+            return await res.json();
+        } catch (err) {
+            console.error("No se pudo obtener el usuario:", err.message);
+            window.location.href = "/home/gotosignin";
+        }
+    }
 
     // Actualiza todos los lugares donde mostramos balance en caliente
     function refreshBalances() {
         // 1) Home
-        fetch("/users/getAccounts", { method: "POST" })
+        fetch("/users/getAccounts", { method: "POST", headers: { "Content-Type": "application/json" },
+            credentials: "include" })
             .then(r => r.ok ? r.json() : Promise.reject("Error"))
             .then(accts => {
                 const total = accts.reduce((s,a) => s + parseFloat(a.balance), 0).toFixed(2);
@@ -150,7 +154,8 @@ Content js-->
             .catch(console.error);
 
         // 2) Profile (si existe el badge de profile)
-        fetch("/users/getAccounts", { method: "POST" })
+        fetch("/users/getAccounts", { method: "POST", headers: { "Content-Type": "application/json" },
+            credentials: "include"})
             .then(r => r.ok ? r.json() : Promise.reject("Error"))
             .then(accts => {
                 const total = accts.reduce((s,a) => s + parseFloat(a.balance), 0).toFixed(2);
@@ -160,7 +165,7 @@ Content js-->
             .catch(console.error);
 
         // 3) Wallets
-        fetch(`/wallets?userId=${user.id}`)
+        fetch(`/wallets?userId=${user.id} `)
             .then(r => r.ok ? r.json() : Promise.reject("Error wallets"))
             .then(ws => {
                 const totalWallets = ws.reduce((sum, w) => sum + parseFloat(w.balance), 0).toFixed(2);
@@ -176,7 +181,8 @@ Content js-->
     async function getAccounts() {
         try {
             const response = await fetch("/users/getAccounts", {
-                method: "POST"
+                method: "POST", headers: { "Content-Type": "application/json" },
+                credentials: "include"
             });
             if (!response.ok) {
                 throw new Error("Error al obtener las cuentas");
@@ -201,57 +207,60 @@ Content js-->
 
         const views = {
             home: `
-    <div class="settings-container">
-      <h1 class="mb-4">Balance Dashboard</h1>
+                <div class="settings-container">
+                  <h1 class="mb-4">Balance Dashboard</h1>
 
-      <!-- Balance Card -->
-      <div class="card custom-card mb-4">
-        <h3>Current Balance</h3>
-        <p class="balance-amount">$0.00</p>
-        <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
-          <button class="btn btn-primary px-4" id="send-link">
-            <i class="bi bi-send-fill me-2"></i>Send
-          </button>
-          <button class="btn btn-success px-4" id="deposit-link">
-            <i class="bi bi-wallet2 me-2"></i>Deposit
-          </button>
-          <button class="btn btn-info px-4" id="btn-bank-accounts">
-            <i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts
-          </button>
-        </div>
-      </div>
+                  <!-- Balance Card -->
+                    <div class="card custom-card mb-4">
+                      <h3>Current Balance</h3>
+                      <p class="balance-amount">$0.00</p>
+                      <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+                        <button class="btn btn-primary px-4" id="send-link">
+                          <i class="bi bi-send-fill me-2"></i>Send
+                        </button>
+                        <button class="btn btn-success px-4" id="deposit-link">
+                          <i class="bi bi-wallet2 me-2"></i>Deposit
+                        </button>
+                        <button class="btn btn-warning px-4" id="withdraw-link">
+                          <i class="bi bi-cash-stack me-2"></i>Withdraw
+                        </button>
+                        <button class="btn btn-info px-4" id="btn-bank-accounts">
+                          <i class="bi bi-credit-card-2-front-fill me-2"></i>Bank Accounts
+                        </button>
+                      </div>
+                    </div>
 
-      <!-- User Rank Card -->
-      <div class="card custom-card mb-4">
-        <div class="d-flex align-items-center mb-3">
-          <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
-          <h4 class="mb-0">Your Rank</h4>
-        </div>
-        <div class="d-flex align-items-center mb-2">
-          <span id="user-rank-badge" class="badge bg-secondary me-3">Bronze</span>
-          <div class="flex-grow-1">
-            <div class="progress" style="height: .6rem;">
-              <div id="user-rank-progress"
-                   class="progress-bar bg-warning"
-                   role="progressbar"
-                   style="width: 0%;"
-                   aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-              </div>
-            </div>
-            <small id="user-rank-text" style="color: white;">0 / 500 pts</small>
-          </div>
-        </div>
-      </div>
+                  <!-- User Rank Card -->
+                  <div class="card custom-card mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
+                      <h4 class="mb-0">Your Rank</h4>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                      <span id="user-rank-badge" class="badge bg-secondary me-3">Bronze</span>
+                      <div class="flex-grow-1">
+                        <div class="progress" style="height: .6rem;">
+                          <div id="user-rank-progress"
+                               class="progress-bar bg-warning"
+                               role="progressbar"
+                               style="width: 0%;"
+                               aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                          </div>
+                        </div>
+                        <small id="user-rank-text" style="color: white;">0 / 500 pts</small>
+                      </div>
+                    </div>
+                  </div>
 
-      <!-- Movements -->
-      <div class="card custom-card">
-        <h3 class="mb-3">Movements</h3>
-        <div id="recent-transactions"></div>
-        <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">
-          See all movements
-        </a>
-      </div>
-    </div>
+                  <!-- Movements -->
+                  <div class="card custom-card">
+                    <h3 class="mb-3">Movements</h3>
+                    <div id="recent-transactions"></div>
+                    <a href="#" id="see-history" class="btn btn-link text-white mt-3 p-0">
+                      See all movements
+                    </a>
+                  </div>
+                </div>
   `,
             profile: `
     <div class="settings-container">
@@ -260,14 +269,10 @@ Content js-->
       <!-- User Information -->
       <div class="card custom-card mb-4">
         <h4 class="mb-3">User Information</h4>
-        <div class="row mb-3">
-          <div class="col-md-4 fw-bold">Name:</div>
-          <div class="col-md-8">${userName}</div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-md-4 fw-bold">Email:</div>
-          <div class="col-md-8">${userEmail}</div>
-        </div>
+        <div class="col-md-4 fw-bold">Name:</div>
+        <div class="col-md-8" id="profile-user-name">Loading...</div>
+        <div class="col-md-4 fw-bold">Email:</div>
+        <div class="col-md-8" id="profile-user-email">Loading...</div>
         <div class="row mb-3">
           <div class="col-md-4 fw-bold">Total Balance:</div>
           <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
@@ -345,31 +350,31 @@ Content js-->
 
 
       <h5 class="mt-4">Transfer Between Wallets</h5>
-<form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
-  <select id="wallet-from" class="form-select bg-dark text-white">
-    <option value="">From</option>
-  </select>
-  <select id="wallet-to" class="form-select bg-dark text-white">
-    <option value="">To</option>
-  </select>
-  <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
-  <button type="submit" class="btn btn-warning">Transfer</button>
-</form>
-      <h5>Connect Wallets</h5>
-      <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
-        <select id="source-wallet" class="form-select bg-dark text-white">
-          <option value="">From</option>
-        </select>
-        <select id="target-wallet" class="form-select bg-dark text-white">
-          <option value="">To</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Connect</button>
-      </form>
+        <form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
+          <select id="wallet-from" class="form-select bg-dark text-white">
+            <option value="">From</option>
+          </select>
+          <select id="wallet-to" class="form-select bg-dark text-white">
+            <option value="">To</option>
+          </select>
+          <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
+          <button type="submit" class="btn btn-warning">Transfer</button>
+        </form>
+              <h5>Connect Wallets</h5>
+              <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
+                <select id="source-wallet" class="form-select bg-dark text-white">
+                  <option value="">From</option>
+                </select>
+                <select id="target-wallet" class="form-select bg-dark text-white">
+                  <option value="">To</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Connect</button>
+              </form>
 
-      <h5>Graph Structure</h5>
-      <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
-    </div>
-  </div>
+              <h5>Graph Structure</h5>
+              <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
+            </div>
+          </div>
 `
 
             ,
@@ -513,8 +518,9 @@ Content js-->
 
                     try {
                         const response = await fetch("/users/getAccounts", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" }
+                            method: "POST"
+                            , headers: { "Content-Type": "application/json" },
+                        credentials: "include"
                         });
 
                         if (!response.ok) throw new Error("Error fetching accounts");
@@ -576,8 +582,8 @@ Content js-->
 
                 try {
                     const response = await fetch("/users/getAccounts", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" }
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        credentials: "include"
                     });
 
                     if (!response.ok) throw new Error("Error fetching accounts");
@@ -602,8 +608,8 @@ Content js-->
 
                 try {
                     const response = await fetch("/users/getCategories", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" }
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        credentials: "include"
                     });
 
                     if (!response.ok) throw new Error("Error fetching categories");
@@ -636,6 +642,42 @@ Content js-->
 
             });
 
+            document.getElementById("withdraw-link")?.addEventListener("click", async (e) => {
+                e.preventDefault();
+
+                // Mostrar el modal
+                const modalElement = document.getElementById("withdraw-modal");
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                // Limpiar opciones anteriores
+                const select = document.getElementById("selectAccount");
+                select.innerHTML = '<option value="">-- Select an account --</option>';
+
+                try {
+                    const response = await fetch("/users/getAccounts", {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        credentials: "include"
+                    });
+
+                    if (!response.ok) throw new Error("Error fetching accounts");
+
+                    const accounts = await response.json();
+
+                    accounts.forEach(account => {
+                        const option = document.createElement("option");
+                        option.value = account.id;
+                        option.textContent = `Account Number: ${account.accountNumber} - $${account.balance}`;
+                        select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error("Error loading accounts:", error);
+                    const errorOption = document.createElement("option");
+                    errorOption.disabled = true;
+                    errorOption.textContent = "Error loading accounts";
+                    select.appendChild(errorOption);
+                }
+            });
 
 
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
@@ -736,6 +778,8 @@ Content js-->
             }
 
             if (view === "profile") {
+                document.getElementById("profile-user-name").innerText = user.name || "Desconocido";
+                document.getElementById("profile-user-email").innerText = user.email || "Sin email";
                 fetch("/points/top?n=1")
                     .then(res => {
                         if (!res.ok) throw new Error("Network response was not ok");
@@ -792,7 +836,8 @@ Content js-->
               `;
 
                 // 2) Cargar y mostrar el balance real
-                fetch("/users/getAccounts", { method: "POST" })
+                fetch("/users/getAccounts", { method: "POST", headers: { "Content-Type": "application/json" },
+                    credentials: "include"})
                     .then(res => res.ok ? res.json() : Promise.reject("Error fetching accounts"))
                     .then(accts => {
                         const total = accts.reduce((sum, a) => sum + parseFloat(a.balance), 0);
@@ -851,7 +896,6 @@ Content js-->
                     .catch(err => console.error(err));
             }
 
-            // En tu script, dentro de loadView():
             if (view === "wallets") {
                 // 1) Renderizamos la plantilla HTML
                 content.innerHTML = views.wallets;
@@ -864,22 +908,22 @@ Content js-->
                     // 2a) Tabla de wallets con botón Manage
                     const tbody = document.getElementById("wallet-table-body");
                     tbody.innerHTML = list2.map(w => `
-          <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
-            <td>${w.name}</td>
-            <td>$${parseFloat(w.balance).toFixed(2)}</td>
-            <td>
-              <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
-            </td>
-          </tr>
-        `).join("");
+                      <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
+                        <td>${w.name}</td>
+                        <td>$${parseFloat(w.balance).toFixed(2)}</td>
+                        <td>
+                          <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
+                        </td>
+                      </tr>
+                    `).join("");
 
                     // 2b) Listado y selects para conexión
                     const ul = document.getElementById("wallet-list");
                     ul.innerHTML = list.map(w =>
                         `<li data-id="${w.id}" data-name="${w.name}" data-balance="${w.balance}"
-       class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
-     ${w.name} — $${parseFloat(w.balance).toFixed(2)}
-   </li>`
+                           class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
+                         ${w.name} — $${parseFloat(w.balance).toFixed(2)}
+                       </li>`
                     ).join("");
 
                     const src = document.getElementById("source-wallet"),
@@ -919,7 +963,8 @@ Content js-->
 
                             // Cargar cuentas bancarias
                             try {
-                                const resp = await fetch("/users/getAccounts", { method: "POST" });
+                                const resp = await fetch("/users/getAccounts", {method: "POST", headers: { "Content-Type": "application/json" },
+                                    credentials: "include" });
                                 if (!resp.ok) throw new Error("No pude cargar cuentas bancarias");
                                 const accounts = await resp.json();
 
@@ -1049,8 +1094,8 @@ Content js-->
                     e.preventDefault();
                     const name = document.getElementById("wallet-name").value;
                     fetch("/wallets", {
-                        method: "POST",
-                        headers: {"Content-Type":"application/json"},
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        credentials: "include",
                         body: JSON.stringify({ userId: user.id, name })
                     }).then(() => loadView("wallets"));
                 });
@@ -1062,8 +1107,8 @@ Content js-->
                     const target = +document.getElementById("target-wallet").value;
                     if (!source || !target) return;
                     fetch("/wallets/graph/connect", {
-                        method: "POST",
-                        headers: {"Content-Type":"application/json"},
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        credentials: "include",
                         body: JSON.stringify({ userId: user.id, sourceWalletId: source, targetWalletId: target })
                     }).then(() => loadView("wallets"));
                 });
@@ -1102,10 +1147,10 @@ Content js-->
                 });
             }
 
-
             if (view === "bank_accounts" || view === "home") {
                 fetch("/users/getAccounts", {
-                    method: "POST"
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    credentials: "include"
                 })
                     .then(r => r.json())
                     .then(data => {
@@ -1133,7 +1178,8 @@ Content js-->
                         const formData = new FormData(form);
 
                         fetch('/Accounts/add', {
-                            method: 'POST',
+                            method: "POST", headers: { "Content-Type": "application/json" },
+                            credentials: "include",
                             body: formData
                         })
                             .then(response => {
@@ -1213,7 +1259,19 @@ Content js-->
         }
 
         // Arranca en HOME
-        loadView("home");
+        (async () => {
+            user = await fetchCurrentUser();
+            if (!user) return;
+
+            cuentas = await getAccounts();
+
+
+            const userName = user.name || "Desconocido";
+            const userEmail = user.email || "Sin email";
+
+            loadView("home");
+        })();
+
 
         // Nav lateral
         document.querySelectorAll(".nav-link[data-section]")
@@ -1323,6 +1381,41 @@ Content js-->
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="scheduleTransaction()">Save</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para la opcion de retirar en home-->
+<div class="modal fade" id="withdraw-modal" tabindex="-1" aria-labelledby="withdraw-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #2b2f38; color: white; border-radius: 1rem; border: none;">
+            <div class="modal-header" style="border-bottom: 1px solid #444;">
+                <h5 class="modal-title" id="withdraw-modal-label">Withdraw</h5>
+                <button type="button" class="btn-close" style="filter: invert(1);" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="withdraw-form" action="/transaction/withdraw" method="POST">
+                <div class="modal-body">
+                    <p>Make sure you enter the data correctly</p>
+                    <div id="form-error-withdraw" class="text-danger mb-2" style="display: none;"></div>
+
+                    <div class="mb-3">
+                        <label for="selectAccount" class="form-label">Withdraw from account</label>
+                        <select id="selectAccount" name="accountOriginId" class="form-select bg-dark text-white border-secondary" required>
+                            <option value="" disabled selected>Select an account</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputAmountW" class="form-label">Amount</label>
+                        <input type="number" step="1000" class="form-control bg-dark text-white border-secondary" id="inputAmountW" name="amount" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top: 1px solid #444;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Withdraw</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1600,8 +1693,8 @@ Content js-->
         submitButton.disabled = true;
 
         fetch('/transaction/send', {
-            method: 'POST',
-            body: formData
+            method: "POST", headers: { "Content-Type": "application/json" },
+            credentials: "include"
         })
             .then(response => {
                 submitButton.disabled = false;
@@ -1646,8 +1739,8 @@ Content js-->
 
 
         fetch('/transaction/deposit', {
-            method: 'POST',
-            body: formData
+            method: "POST", headers: { "Content-Type": "application/json" },
+            credentials: "include"
         })
             .then(response => {
                 if (response.ok) {
@@ -1664,6 +1757,55 @@ Content js-->
                 console.error('Error:', error);
             });
     });
+
+    document.getElementById('withdraw-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const errorDiv = document.getElementById('form-error-withdraw');
+        const selectPurse = document.getElementById('selectAccount');
+
+        let errorMessages = [];
+
+        if (!selectPurse.value) {
+            errorMessages.push('Please select an account to send from.');
+        }
+
+        if (errorMessages.length > 0) {
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = errorMessages.join('<br>');
+            return;
+        } else {
+            errorDiv.style.display = 'none';
+        }
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        fetch('/transaction/withdraw', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                submitButton.disabled = false;
+                if (!response.ok) {
+                    throw new Error('Server error');
+                }
+                return response.text();
+            })
+            .then(data => {
+                const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                modal.show();
+
+                form.reset();
+            })
+            .catch(error => {
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = 'Error: ' + error.message;
+            });
+    });
+
 
 </script>
 
@@ -1712,8 +1854,8 @@ Content js-->
         const formData = new FormData(form);
 
         fetch(form.action, {
-            method: 'POST',
-            body: formData
+            method: "POST", headers: { "Content-Type": "application/json" },
+            credentials: "include"
         })
             .then(response => {
                 if (response.ok) {

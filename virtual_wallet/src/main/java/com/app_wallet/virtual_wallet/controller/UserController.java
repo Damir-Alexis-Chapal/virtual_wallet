@@ -81,4 +81,14 @@ public class UserController {
         return ResponseEntity.ok(categories);
     }
 
+    @GetMapping("/me")
+    @ResponseBody
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Usuario no autenticado");
+        }
+        return ResponseEntity.ok(user);
+    }
+
 }
