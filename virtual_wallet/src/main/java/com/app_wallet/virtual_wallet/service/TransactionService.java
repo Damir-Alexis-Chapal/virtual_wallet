@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -34,6 +35,16 @@ public class TransactionService {
         this.walletConnectionRepository = walletConnectionRepository;
         this.walletGraphService         = walletGraphService;
         this.accountRepo               = accountRepo;
+    }
+
+    public List<TransactionDTO> getScheduledExecutedTransactions(Long userId) {
+        // Obtiene todas las transacciones del usuario, filtra por tipo y las convierte a DTO
+        return transactionRepository
+                .findByUserIdOrderByDateDesc(userId)          // todas del usuario
+                .stream()
+                .filter(e -> "SCHEDULED".equals(e.getType()))  // solo las programadas
+                .map(TransactionMapper::toDTO)                 // a DTO
+                .collect(Collectors.toList());                 // como List
     }
 
     @Transactional
@@ -108,4 +119,5 @@ public class TransactionService {
         }
         return list;
     }
+
 }

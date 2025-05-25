@@ -22,10 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/transaction")
@@ -285,5 +283,37 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/scheduled/all")
+    @ResponseBody
+    public List<ScheduledTransactionEntity> getAllScheduled(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) return Collections.emptyList();
+        return scheduledTransactionRepository.findByUserId(user.getId());
+    }
 
+    @GetMapping("/scheduled/executed")
+    @ResponseBody
+    public List<TransactionDTO> getScheduledExecuted(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) return Collections.emptyList();
+
+        // 1) Obtengo tu LinkedList:
+        com.app_wallet.virtual_wallet.utils.LinkedList<TransactionDTO> ll =
+                transactionService.getAllTransactions(user.getId());
+
+        // 2) Lo paso a ArrayList para poder streamearlo:
+        List<TransactionDTO> all = new ArrayList<>();
+        for (TransactionDTO dto : ll) {
+            all.add(dto);
+        }
+
+        // 3) Filtro SCHEDULED / origin o destiny
+        return all.stream()
+                .filter(tx -> "SCHEDULED".equals(tx.getType())
+                        && (tx.getOrigin().equals(user.getId())
+                        || accountRepository.findByAccountNumber(Long.parseLong(tx.getDestination()))
+                        .map(a -> a.getUserId().equals(user.getId()))
+                        .orElse(false)))
+                .collect(Collectors.toList());
+    }
 }
