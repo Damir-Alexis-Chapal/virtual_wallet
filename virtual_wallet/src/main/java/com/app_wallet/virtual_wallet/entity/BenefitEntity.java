@@ -1,20 +1,24 @@
 package com.app_wallet.virtual_wallet.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="benefit_entity")
 public class BenefitEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String title;
-    private String description;
-    private int pointsRequired;
+
     private boolean isActive;
 
     public BenefitEntity() {
     }
 
-    public BenefitEntity(Long id, String title, String description, int pointsRequired, boolean isActive) {
+    public BenefitEntity(Long id, String title, boolean isActive) {
         this.id = id;
         this.title = title;
-        this.description = description;
-        this.pointsRequired = pointsRequired;
         this.isActive = isActive;
     }
 
@@ -34,22 +38,6 @@ public class BenefitEntity {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getPointsRequired() {
-        return pointsRequired;
-    }
-
-    public void setPointsRequired(int pointsRequired) {
-        this.pointsRequired = pointsRequired;
-    }
-
     public boolean isActive() {
         return isActive;
     }
@@ -57,4 +45,5 @@ public class BenefitEntity {
     public void setActive(boolean active) {
         isActive = active;
     }
+
 }
