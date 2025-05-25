@@ -155,6 +155,7 @@
 <script>
     let cuentas = [];
     let user = null;
+    let totalPoints= 0;
     //funcion para llenar al usuario
     async function fetchCurrentUser() {
         try {
@@ -177,17 +178,6 @@
 
     // Actualiza todos los lugares donde mostramos balance en caliente
     function refreshBalances() {
-        // 1) Home
-        fetch("/users/getAccounts", { method: "POST", headers: { "Content-Type": "application/json" },
-            credentials: "include" })
-            .then(r => r.ok ? r.json() : Promise.reject("Error"))
-            .then(accts => {
-                const total = accts.reduce((s,a) => s + parseFloat(a.balance), 0).toFixed(2);
-                document.querySelectorAll(".balance-amount").forEach(el => {
-                    el.textContent = `$${total}`;
-                });
-            })
-            .catch(console.error);
 
         // 2) Profile (si existe el badge de profile)
         fetch("/users/getAccounts", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -212,6 +202,9 @@
             })
             .catch(console.error);
     }
+    //por favor no borrar ninguna de las 3, sino
+    //todo se jode
+
     //funcion para obtener las cuentas
         async function getAccounts() {
             try {
@@ -251,8 +244,7 @@
             `).join("") : `<li class="list-group-item bg-dark text-light text-center">No accounts yet.</li>`;
                 });
         }
-
-        //funcion para obtener las cuentas 3
+    //funcion para obtener las cuentas 3
         function updateBalanceAmount() {
             fetch("/users/getAccounts", {
                 method: "POST",
@@ -271,8 +263,11 @@
                     console.error("Error fetching accounts to update balance:", err);
                 });
         }
-
-
+    //funcion para arreglar el saldo
+    function formatBalance(bal) {
+        return Number.isFinite(+bal) ? parseFloat(bal).toFixed(2) : "0.00";
+    }
+    ///
 
     async function init() {
             cuentas = await getAccounts();
@@ -398,66 +393,66 @@
                 </div>
   `,
             wallets: `
-          <div class="settings-container">
-            <h2 class="mb-4">My Wallets</h2>
+              <div class="settings-container">
+                <h2 class="mb-4">My Wallets</h2>
 
-            <div class="card custom-card mb-4">
-              <h4 class="mb-3">Create New Wallet</h4>
-              <form id="wallet-create-form">
-                <div class="mb-3">
-                  <label for="wallet-name" class="form-label">Wallet Name</label>
-                  <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
-                         placeholder="e.g. Savings" required>
-                </div>
-                <button type="submit" class="btn btn-success">Create Wallet</button>
-              </form>
-            </div>
-
-            <div class="card custom-card">
-              <h4 class="mb-3">Your Wallets</h4>
-              <div class="table-responsive">
-                <table class="table table-dark table-striped align-middle">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Balance</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="wallet-table-body"></tbody>
-                </table>
-              </div>
-
-              <h5 class="mt-4">All Wallets List (for graph connect)</h5>
-              <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
-
-
-              <h5 class="mt-4">Transfer Between Wallets</h5>
-                <form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
-                  <select id="wallet-from" class="form-select bg-dark text-white">
-                    <option value="">From</option>
-                  </select>
-                  <select id="wallet-to" class="form-select bg-dark text-white">
-                    <option value="">To</option>
-                  </select>
-                  <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
-                  <button type="submit" class="btn btn-warning">Transfer</button>
-                </form>
-                      <h5>Connect Wallets</h5>
-                      <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
-                        <select id="source-wallet" class="form-select bg-dark text-white">
-                          <option value="">From</option>
-                        </select>
-                        <select id="target-wallet" class="form-select bg-dark text-white">
-                          <option value="">To</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary">Connect</button>
-                      </form>
-
-                      <h5>Graph Structure</h5>
-                      <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
+                <div class="card custom-card mb-4">
+                  <h4 class="mb-3">Create New Wallet</h4>
+                  <form id="wallet-create-form">
+                    <div class="mb-3">
+                      <label for="wallet-name" class="form-label">Wallet Name</label>
+                      <input type="text" id="wallet-name" class="form-control bg-dark text-white border-secondary"
+                             placeholder="e.g. Savings" required>
                     </div>
+                    <button type="submit" class="btn btn-success">Create Wallet</button>
+                  </form>
+                </div>
+
+                <div class="card custom-card">
+                  <h4 class="mb-3">Your Wallets</h4>
+                  <div class="table-responsive">
+                    <table class="table table-dark table-striped align-middle">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Balance</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="wallet-table-body"></tbody>
+                    </table>
                   </div>
+
+                  <h5 class="mt-4">All Wallets List (for graph connect)</h5>
+                  <ul id="wallet-list" class="list-group list-group-flush bg-dark mb-3"></ul>
+
+
+                  <h5 class="mt-4">Transfer Between Wallets</h5>
+                    <form id="wallet-transfer-form" class="d-flex gap-2 mb-3">
+                      <select id="wallet-from" class="form-select bg-dark text-white">
+                        <option value="">From</option>
+                      </select>
+                      <select id="wallet-to" class="form-select bg-dark text-white">
+                        <option value="">To</option>
+                      </select>
+                      <input type="number" id="wallet-transfer-amount" class="form-control bg-dark text-white" placeholder="Amount">
+                      <button type="submit" class="btn btn-warning">Transfer</button>
+                    </form>
+                          <h5>Connect Wallets</h5>
+                          <form id="wallet-connect-form" class="d-flex gap-2 mb-3">
+                            <select id="source-wallet" class="form-select bg-dark text-white">
+                              <option value="">From</option>
+                            </select>
+                            <select id="target-wallet" class="form-select bg-dark text-white">
+                              <option value="">To</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Connect</button>
+                          </form>
+
+                          <h5>Graph Structure</h5>
+                          <pre id="wallet-graph" class="bg-dark p-3" style="white-space: pre-wrap;"></pre>
+                        </div>
+                      </div>
         `,
             history: `
   <h2 class="mb-4">Movements</h2>
@@ -548,8 +543,7 @@
                                     type="number"
                                     class="form-control bg-dark text-white border-secondary"
                                     id="account-number"
-                                    name="accountNumber" required
-                                />
+                                    name="accountNumber" required/>
 
                             </div>
                             <button type="submit" class="btn btn-success w-100">
@@ -562,49 +556,62 @@
             `,
             point_store: `
             <div class="settings-container" id="point-store-section">
-              <h1 class="mb-4">Point Store</h1>
+                <h1 class="mb-4">Point Store</h1>
+                <div class="card custom-card">
+                  <!-- Total Points -->
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-stars me-2" style="font-size: 1.5rem; color: gold;"></i>
+                      <h5 class="mb-0">Available Points:</h5>
+                    </div>
+                    <span id="user-points-amount" class="badge bg-warning text-dark fs-5 px-3 py-2">0 pts</span>
+                  </div>
 
-              <!-- Active Benefit Card -->
-              <div class="card custom-card mb-4">
-                <h3>Active Benefit</h3>
-                <div class="mb-3">
-                  <label for="active-benefit" class="form-label">Current Benefit</label>
-                  <input type="text" class="form-control" id="active-benefit" placeholder="No active benefit" />
+                  <!-- Active Benefits -->
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-gift-fill me-2" style="font-size: 1.5rem; color: lightgreen;"></i>
+                      <h5 class="mb-0">Active Benefits:</h5>
+                    </div>
+                    <span id="user-active-benefits" class="badge bg-success fs-6 px-3 py-2">None</span>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Total Points Card -->
-              <div class="card custom-card mb-4">
-                <h3>Total Points</h3>
-                <p class="balance-amount" id="total-points">0 pts</p>
-                <div class="d-flex justify-content-center mt-3">
-                  <button class="btn btn-warning px-4" id="redeem-points-btn">
-                    <i class="bi bi-stars me-2"></i>Redeem Points
-                  </button>
-                </div>
-              </div>
-
-              <!-- Point Items Store (Optional Store Section) -->
+              <!-- Point Items Store-->
               <div class="card custom-card">
-                <h3 class="mb-3">Available Rewards</h3>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <div class="card bg-dark text-white p-3 h-100">
-                      <h5>Free Transaction</h5>
-                      <p>Redeem this to get one free transaction without fees.</p>
-                      <button class="btn btn-outline-success mt-auto w-100">Redeem - 100 pts</button>
+              <h3 class="mb-3 bi bi-gift-fill me-2" style="font-size: 1.5rem; color: deepskyblue" > Available Rewards</h3>
+              <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                  <div class="card bg-dark text-white p-3 d-flex flex-column h-100">
+                    <h5>Commission Discount</h5>
+                    <p>10% reduction in the commission for transfers.</p>
+                    <div class="mt-auto">
+                      <button class="btn btn-success w-100">100 pts</button>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="card bg-dark text-white p-3 h-100">
-                      <h5>Account Upgrade</h5>
-                      <p>Upgrade your user tier for better benefits.</p>
-                      <button class="btn btn-outline-success mt-auto w-100">Redeem - 300 pts</button>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="card bg-dark text-white p-3 d-flex flex-column h-100">
+                    <h5>Free Transaction</h5>
+                    <p>One month without withdrawal fees.</p>
+                    <div class="mt-auto">
+                      <button class="btn btn-success w-100">500 pts</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="card bg-dark text-white p-3 d-flex flex-column h-100">
+                    <h5>Bonus</h5>
+                    <p>Balance bonus of 50 units in the wallet.</p>
+                    <div class="mt-auto">
+                      <button class="btn btn-success w-100">1000 pts</button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+
             `
         };
 
@@ -625,14 +632,18 @@
             });
         }
 
+        ///
+        //funcion que muestra todas las vistas LOAD VIEW
+        ///
         function loadView(view) {
             document.getElementById("main-content").innerHTML = views[view] || "<h2>Not Found</h2>";
             console.log("Vista cargada:", view);
             refreshBalances();
 
-            // 1) Modales de depósito y envío
-            document.getElementById("deposit-link")
-                ?.addEventListener("click", async e => {
+            //listeners
+
+            //para deposit
+            document.getElementById("deposit-link")?.addEventListener("click", async e => {
                     // Mostrar el modal
                     const modalElement = document.getElementById("deposit-modal");
                     const modal = new bootstrap.Modal(modalElement);
@@ -672,24 +683,7 @@
 
                 });
 
-            document.getElementById("deposit-form")?.addEventListener("submit", e => {
-                e.preventDefault();
-                const accountDestiny = +document.getElementById("selectPurse2").value;
-                const amount        = parseFloat(document.getElementById("depositAmount").value);
-                if (!accountDestiny || !amount) return alert("Completa todos los campos");
-
-                fetch(`/transaction/deposit?depositAmount=${amount}&accountOriginNumber=<TU_ORIGIN_ID>&accountDestiny=${accountDestiny}`, {
-                    method: "POST"
-                })
-                    .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
-                    .then(_ => {
-                        refreshBalances();
-                        bootstrap.Modal.getInstance(document.getElementById("deposit-modal")).hide();
-                        loadView("home");
-                    })
-                    .catch(err => alert(err));
-            });
-
+            //para send
             document.getElementById("send-link")?.addEventListener("click", async (e) => {
                 e.preventDefault();
 
@@ -769,6 +763,7 @@
 
             });
 
+            //para withdraw/ retirar
             document.getElementById("withdraw-link")?.addEventListener("click", async (e) => {
                 e.preventDefault();
 
@@ -806,6 +801,7 @@
                 }
             });
 
+            //para mostrar las cuentas bancarias
             document.getElementById("btn-bank-accounts")?.addEventListener("click", e => {
                 e.preventDefault();
                 loadView("bank_accounts");
@@ -821,7 +817,10 @@
                 })
                     .then(r => r.json())
                     .then(accounts => {
-                        const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+                        const total = accounts.reduce((sum, acc) => {
+                            const bal = parseFloat(acc.balance);
+                            return sum + (Number.isFinite(bal) ? bal : 0);
+                        }, 0);
                         const balanceElem = document.querySelector(".balance-amount");
                         if (balanceElem) {
                             balanceElem.textContent = `$${total.toFixed(2)}`;
@@ -1080,7 +1079,7 @@
                     tbody.innerHTML = list2.map(w => `
                       <tr data-wallet-id="${w.id}" data-wallet-name="${w.name}" data-wallet-balance="${w.balance}">
                         <td>${w.name}</td>
-                        <td>$${parseFloat(w.balance).toFixed(2)}</td>
+                        <td>$${formatBalance(w.balance)}</td>
                         <td>
                           <button class="btn btn-sm btn-light manage-wallet-btn">Manage</button>
                         </td>
@@ -1092,7 +1091,7 @@
                     ul.innerHTML = list.map(w =>
                         `<li data-id="${w.id}" data-name="${w.name}" data-balance="${w.balance}"
                            class="list-group-item bg-secondary text-white d-flex justify-content-between wallet-item">
-                         ${w.name} — $${parseFloat(w.balance).toFixed(2)}
+                         ${w.name} — $$${formatBalance(w.balance)}
                        </li>`
                     ).join("");
 
@@ -1124,7 +1123,7 @@
 
                             // Rellenar modal
                             document.getElementById("modal-wallet-name").textContent    = name;
-                            document.getElementById("modal-wallet-balance").textContent = parseFloat(bal).toFixed(2);
+                            document.getElementById("modal-wallet-balance").textContent = formatBalance(bal);
                             document.getElementById("manage-amount").value = "";
 
                             // Guardar walletId en el form
@@ -1349,7 +1348,6 @@
 
                         fetch('/Accounts/add', {
                             method: "POST",
-                            headers: { "Content-Type": "application/json" },
                             credentials: "include",
                             body: formData
                         })
@@ -1374,6 +1372,25 @@
                             });
                     });
                 }
+            }
+
+            if(view === "point_store"){
+                fetch("/points/top?n=1")
+                    .then(res => {
+                        if (!res.ok) throw new Error("Network response was not ok");
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (!data.length) return;
+                        const { accumulatedPoints } = data[0];
+
+                        // Setear solo los puntos acumulados
+                        const pointsDisplay = document.getElementById("user-points-amount");
+                        if (pointsDisplay) {
+                            pointsDisplay.textContent = `${accumulatedPoints} pts`;
+                        }
+                    })
+                    .catch(err => console.error("Error loading points:", err));
             }
 
             if (view === "statistics") {
@@ -1838,8 +1855,9 @@
         submitButton.disabled = true;
 
         fetch('/transaction/send', {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            credentials: "include"
+            method: "POST",
+            credentials: "include",
+            body: formData
         })
             .then(response => {
                 submitButton.disabled = false;
@@ -1884,8 +1902,8 @@
 
 
         fetch('/transaction/deposit', {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            credentials: "include"
+            method: 'POST',
+            body: formData
         })
             .then(response => {
                 if (response.ok) {
@@ -1929,7 +1947,8 @@
         submitButton.disabled = true;
 
         fetch('/transaction/withdraw', {
-            method: 'POST',
+            method: "POST",
+            credentials: "include",
             body: formData
         })
             .then(response => {

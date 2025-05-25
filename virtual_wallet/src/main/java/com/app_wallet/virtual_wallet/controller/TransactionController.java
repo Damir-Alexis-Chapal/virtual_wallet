@@ -179,10 +179,10 @@ public class TransactionController {
     @PostMapping("/deposit")
     @ResponseBody
     public ResponseEntity<?> deposit(HttpSession session,
-                                        @RequestParam BigDecimal depositAmount,
-                                        @RequestParam Long accountOriginNumber,
-                                        @RequestParam Long accountDestiny
-                                        ) {
+                                     @RequestParam BigDecimal depositAmount,
+                                     @RequestParam Long accountOriginNumber,
+                                     @RequestParam Long accountDestiny
+    ) {
 
         String category = "OTHER";
         String description = "DEPOSIT";
@@ -222,6 +222,7 @@ public class TransactionController {
         response.put("message", "Transaction saved successfully");
         return ResponseEntity.ok(response);
     }
+
 
 
     @PostMapping("/schedule")
