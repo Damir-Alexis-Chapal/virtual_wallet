@@ -14,10 +14,12 @@ public class TransactionDTO {
     private Long origin;
     private String destination;
     private Category category;
+    private String benefitTitle;
+
 
     public TransactionDTO() {}
 
-    public TransactionDTO(Long id, BigDecimal amount, String type, LocalDateTime date, String description, Long origin, String destination) {
+    public TransactionDTO(Long id, BigDecimal amount, String type, LocalDateTime date, String description, Long origin, String destination, String benefitTitle) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -25,6 +27,7 @@ public class TransactionDTO {
         this.description = description;
         this.origin = origin;
         this.destination = destination;
+        this.benefitTitle = benefitTitle;
     }
 
     public Long getId() { return id; }
@@ -49,4 +52,12 @@ public class TransactionDTO {
     public void setDestination(String destination) { this.destination = destination; }
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+
+    public String getBenefitTitle() {
+        return benefitTitle;
+    }
+
+    public void setBenefitTitle(String benefitTitle) {
+        this.benefitTitle = benefitTitle;
+    }
 }

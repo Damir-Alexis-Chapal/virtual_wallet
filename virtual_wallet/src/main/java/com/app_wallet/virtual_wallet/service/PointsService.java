@@ -1,5 +1,6 @@
 package com.app_wallet.virtual_wallet.service;
 
+import com.app_wallet.virtual_wallet.entity.BenefitEntity;
 import com.app_wallet.virtual_wallet.entity.SystemPointsEntity;
 import com.app_wallet.virtual_wallet.entity.UserEntity;
 import com.app_wallet.virtual_wallet.model.SystemPoints;
@@ -20,15 +21,17 @@ import java.util.stream.Collectors;
 public class PointsService {
     @Autowired
     private final SystemPointsRepository repo;
-
     private final BinaryTree<SystemPoints> pointsTree = new BinaryTree<>();
+    private final SystemPointsEntity systemPointsEntity = new SystemPointsEntity();
+    private final BenefitService benefitService;
 
     @Autowired
     private final UserRepository userRepository; // asegúrate de tenerlo
 
-    public PointsService(SystemPointsRepository repo, UserRepository userRepository) {
+    public PointsService(SystemPointsRepository repo, UserRepository userRepository,  BenefitService benefitService) {
         this.repo = repo;
         this.userRepository = userRepository;
+        this.benefitService = benefitService;
 
         repo.findAll().stream()
                 .map(SystemPoints::new)
@@ -71,6 +74,32 @@ public class PointsService {
                         .orElseThrow())
                 .toList();
     }
+    @Transactional
+    public boolean redeemPoints(Long userId, int points) {
+
+        Optional<SystemPointsEntity> optional = repo.findByUserId(userId);
+        if (optional.isEmpty()) {
+            return false;
+        }
+
+        SystemPointsEntity point = optional.get();
+        if (point.getAccumulatedPoints() < 0) {
+            return false;
+        }
+
+        boolean benefitGranted = benefitService.getBenefit(points, userId);
+        if (!benefitGranted) {
+            return false;
+        }
+
+        point.setAccumulatedPoints(point.getAccumulatedPoints());
+        repo.save(point);
+
+        return true;
+    }
+
+
+
 
     public Optional<SystemPointsEntity> findByUserId(Long userId) {
         return repo.findByUserId(userId);

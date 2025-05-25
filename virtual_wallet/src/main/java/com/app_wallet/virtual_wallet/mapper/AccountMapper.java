@@ -10,7 +10,6 @@ public class AccountMapper {
         if (dto == null) {
             return null;
         }
-
         AccountEntity entity = new AccountEntity();
         entity.setId(dto.getId());
         entity.setBalance(dto.getBalance());

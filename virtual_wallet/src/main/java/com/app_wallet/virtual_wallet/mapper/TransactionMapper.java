@@ -15,6 +15,7 @@ public class TransactionMapper {
         entity.setUserDestiny(dto.getDestination());
         entity.setUserId(userId);
         entity.setCategory(dto.getCategory());
+        entity.setBenefitTitle(dto.getBenefitTitle());
         return entity;
     }
 
@@ -30,6 +31,7 @@ public class TransactionMapper {
         dto.setOrigin(entity.getAccountOrigin());
         dto.setDestination(entity.getUserDestiny());
         dto.setCategory(entity.getCategory());
+        dto.setBenefitTitle(entity.getBenefitTitle());
 
         return dto;
     }

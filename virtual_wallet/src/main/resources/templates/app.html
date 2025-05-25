@@ -339,58 +339,72 @@
                 </div>
   `,
             profile: `
-                <div class="settings-container">
-                  <h2 class="mb-4">Profile</h2>
+              <div class="settings-container">
+                <h2 class="mb-4">Profile</h2>
 
-                  <!-- User Information -->
-                  <div class="card custom-card mb-4">
-                    <h4 class="mb-3">User Information</h4>
-                    <div class="col-md-4 fw-bold">Name:</div>
-                    <div class="col-md-8" id="profile-user-name">Loading...</div>
-                    <div class="col-md-4 fw-bold">Email:</div>
-                    <div class="col-md-8" id="profile-user-email">Loading...</div>
-                    <div class="row mb-3">
-                      <div class="col-md-4 fw-bold">Total Balance:</div>
-                      <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
-                    </div>
+                <!-- User Information -->
+                <div class="card custom-card mb-4">
+                  <h4 class="mb-3">User Information</h4>
+                  <div class="col-md-4 fw-bold">Name:</div>
+                  <div class="col-md-8" id="profile-user-name">Loading...</div>
+
+                  <div class="col-md-4 fw-bold">Email:</div>
+                  <div class="col-md-8" id="profile-user-email">Loading...</div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Total Balance:</div>
+                    <div id="profile-balance" class="col-md-8 text-success fw-bold">$0.00</div>
                   </div>
 
-                  <!-- User Rank in Profile -->
-                  <div class="card custom-card mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                      <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
-                      <h4 class="mb-0">Your Rank</h4>
-                    </div>
-                    <div class="d-flex align-items-center mb-2">
-                      <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronze</span>
-                      <div class="flex-grow-1">
-                        <div class="progress" style="height: .6rem;">
-                          <div id="profile-rank-progress"
-                               class="progress-bar bg-warning"
-                               role="progressbar"
-                               style="width: 0%;"
-                               aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                          </div>
-                        </div>
-                        <small id="profile-rank-text" style="color: white;">0 / 500 pts</small>
-                      </div>
-                    </div>
+                  <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Benefit:</div>
+                    <div id="profile-benefit" class="col-md-8">Loading...</div>
                   </div>
 
-                  <!-- Account Actions -->
-                  <div class="card custom-card">
-                    <h4 class="mb-3">Account Actions</h4>
-                    <div class="d-flex gap-3">
-                      <button class="btn btn-outline-light">
-                        <i class="bi bi-pencil-fill me-2"></i>Edit Profile
-                      </button>
-                      <button class="btn btn-outline-danger">
-                        <i class="bi bi-trash-fill me-2"></i>Delete Account
-                      </button>
+                  <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Benefit status:</div>
+                    <div id="benefit-status" class="col-md-8">
+                      <span class="badge bg-success fs-6" id="profile-status-badge">Active</span>
                     </div>
                   </div>
                 </div>
-  `,
+
+                <!-- User Rank in Profile -->
+                <div class="card custom-card mb-4">
+                  <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-award-fill me-2" style="font-size: 1.5rem; color: gold;"></i>
+                    <h4 class="mb-0">Your Rank</h4>
+                  </div>
+                  <div class="d-flex align-items-center mb-2">
+                    <span id="profile-rank-badge" class="badge bg-secondary me-3">Bronze</span>
+                    <div class="flex-grow-1">
+                      <div class="progress" style="height: .6rem;">
+                        <div id="profile-rank-progress"
+                             class="progress-bar bg-warning"
+                             role="progressbar"
+                             style="width: 0%;"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <small id="profile-rank-text" style="color: white;">0 / 500 pts</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Account Actions -->
+                <div class="card custom-card">
+                  <h4 class="mb-3">Account Actions</h4>
+                  <div class="d-flex gap-3">
+                    <button class="btn btn-outline-light">
+                      <i class="bi bi-pencil-fill me-2"></i>Edit Profile
+                    </button>
+                    <button class="btn btn-outline-danger">
+                      <i class="bi bi-trash-fill me-2"></i>Delete Account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `,
             wallets: `
               <div class="settings-container">
                 <h2 class="mb-4">My Wallets</h2>
@@ -585,7 +599,7 @@
                     <h5>Commission Discount</h5>
                     <p>10% reduction in the commission for transfers.</p>
                     <div class="mt-auto">
-                      <button class="btn btn-success w-100">100 pts</button>
+                      <button class="btn btn-success w-100">100</button>
                     </div>
                   </div>
                 </div>
@@ -594,7 +608,7 @@
                     <h5>Free Transaction</h5>
                     <p>One month without withdrawal fees.</p>
                     <div class="mt-auto">
-                      <button class="btn btn-success w-100">500 pts</button>
+                      <button class="btn btn-success w-100">500</button>
                     </div>
                   </div>
                 </div>
@@ -603,7 +617,7 @@
                     <h5>Bonus</h5>
                     <p>Balance bonus of 50 units in the wallet.</p>
                     <div class="mt-auto">
-                      <button class="btn btn-success w-100">1000 pts</button>
+                      <button class="btn btn-success w-100">1000</button>
                     </div>
                   </div>
                 </div>
@@ -834,27 +848,30 @@
                 });
 
                 // Puntos y rango
-                fetch("/points/top?n=1")
-                    .then(res => {
-                        if (!res.ok) throw new Error("Network response was not ok");
-                        return res.json();
-                    })
+                fetch("/points/my")
+                    .then(res => res.json())
                     .then(data => {
-                        if (!data.length) return;
-                        const { accumulatedPoints, rangeUser } = data[0];
+                        const accumulatedPoints = data.accumulatedPoints || 0;
+                        const rangeUser = data.rangeUser || "BRONZE";
                         const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
                         const maxPts = limits[rangeUser] || 500;
                         const pct = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
 
                         document.getElementById("user-rank-badge").textContent =
                             rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+
                         const bar = document.getElementById("user-rank-progress");
                         bar.style.width = pct + "%";
                         bar.setAttribute("aria-valuenow", pct);
+
                         document.getElementById("user-rank-text").textContent =
                             `${accumulatedPoints} / ${maxPts} pts`;
                     })
-                    .catch(err => console.error("Error loading points:", err));
+                    .catch(err => {
+                        console.error("Error loading points:", err);
+                        // En caso de error mostrar 0 pts
+                        document.getElementById("user-rank-text").textContent = `0 / 500 pts`;
+                    });
 
                 // Transacciones recientes
                 fetch("/transaction/recent")
@@ -914,94 +931,177 @@
             if (view === "profile") {
                 document.getElementById("profile-user-name").innerText = user.name || "Desconocido";
                 document.getElementById("profile-user-email").innerText = user.email || "Sin email";
-                fetch("/points/top?n=1")
+
+                fetch("/points/my", {
+                    method: "GET",
+                    credentials: "include"
+                })
                     .then(res => {
                         if (!res.ok) throw new Error("Network response was not ok");
                         return res.json();
                     })
                     .then(data => {
-                        if (!data.length) return;
-                        const { accumulatedPoints, rangeUser } = data[0];
+
+                        const accumulatedPoints = data.accumulatedPoints ?? 0;
+                        const rangeUser = data.rangeUser || "BRONZE";
                         const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
-                        const maxPts = limits[rangeUser] || 500;
-                        const pct    = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+                        const maxPts = limits[rangeUser];
+                        const pct = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+
 
                         document.getElementById("profile-rank-badge").textContent =
                             rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+
+
                         const bar = document.getElementById("profile-rank-progress");
-                        bar.style.width = pct + "%";
-                        bar.setAttribute("aria-valuenow", pct);
-                        document.getElementById("profile-rank-text").textContent =
-                            `${accumulatedPoints} / ${maxPts} pts`;
+                        if (bar) {
+                            bar.style.width = pct + "%";
+                            bar.setAttribute("aria-valuenow", pct);
+                        }
+
+
+                        const text = document.getElementById("profile-rank-text");
+                        if (text) {
+                            text.textContent = `${accumulatedPoints} / ${maxPts} pts`;
+                        }
                     })
                     .catch(err => console.error("Error loading profile points:", err));
+
+                fetch("/users/getNameBenefit", {
+                    method: "GET",
+                    credentials: "include"
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Network response was not ok");
+                        return res.json();
+                    })
+                    .then(data => {
+                        const title = data.title || "No benefits";
+                        const active = data.active === true;
+
+                        const benefitEl = document.getElementById("profile-benefit");
+                        const statusBadge = document.getElementById("profile-status-badge");
+
+                        if (benefitEl) benefitEl.innerText = title;
+
+                        if (statusBadge) {
+                            statusBadge.innerText = active ? "Active" : "Inactive";
+                            statusBadge.classList.remove("bg-success", "bg-danger");
+                            statusBadge.classList.add(active ? "bg-success" : "bg-danger");
+                        }
+                    })
+                    .catch(err => console.error("Error loading profile benefit:", err));
+
+
             }
 
             if (view === "history") {
                 content.innerHTML = `
-    <h2 class="mb-4">Movements</h2>
+                    <h2 class="mb-4">Movements</h2>
 
-    <!-- Balance Card -->
-    <div class="card custom-card mb-4">
-      <h3>Current Balance</h3>
-      <p class="balance-amount">$0.00</p>
-    </div>
+                    <!-- Balance Card con dropdown para cuentas -->
+                    <div class="card custom-card mb-4">
+                  <div class="row">
+                    <!-- Columna del Balance -->
+                    <div class="col-md-6">
+                      <h3>Current Balance</h3>
+                      <p class="balance-amount">$0.00</p>
+                    </div>
 
-    <!-- 1) Full Movements Table -->
-    <div class="card custom-card mb-4">
-      <h4 class="mb-3">All movements</h4>
-      <div class="table-responsive">
-        <table class="table table-dark table-striped table-hover align-middle">
-          <thead>
-            <tr>
-              <th>ID</th><th>Type</th><th>Destiny</th><th>Amount</th><th>Description</th><th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="all-movements">
-            <tr><td colspan="6" class="text-center">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+                    <!-- Columna del Dropdown -->
+                    <div class="col-md-6">
+                      <h3 for="account-select" class="form-label mt-3">My Accounts</h3>
+                      <select id="account-select" class="form-select bg-dark text-white border-secondary" aria-label="Select account">
+                        <option selected disabled>Loading accounts...</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
 
-    <!-- 2) Scheduled Executed Table -->
-    <div class="card custom-card">
-      <h4 class="mb-3">Scheduled Transactions (Executed)</h4>
-      <div class="table-responsive">
-        <table class="table table-dark table-striped align-middle">
-          <thead>
-            <tr>
-              <th>ID</th><th>Type</th><th>Destiny</th><th>Amount</th><th>Description</th><th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="scheduled-movements">
-            <tr><td colspan="6" class="text-center">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
 
-                // ─── 1) Refrescar balance ─────────────────────────────
+                    <!-- 1) Full Movements Table -->
+                    <div class="card custom-card mb-4">
+                      <h4 class="mb-3">All movements</h4>
+                      <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover align-middle">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>Type</th>
+                              <th>Origin</th>
+                              <th>Destiny</th>
+                              <th>Benefit</th>
+                              <th>Amount</th>
+                              <th>Description</th>
+                              <th>Date</th>
+                            </tr>
+                          </thead>
+                          <tbody id="all-movements">
+                            <tr><td colspan="8" class="text-center">Loading…</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
 
+                    <!-- 2) Scheduled Executed Table -->
+                    <div class="card custom-card">
+                      <h4 class="mb-3">Scheduled Transactions (Executed)</h4>
+                      <div class="table-responsive">
+                        <table class="table table-dark table-striped align-middle">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>Type</th>
+                              <th>Origin</th>
+                              <th>Destiny</th>
+                              <th>Benefit</th>
+                              <th>Amount</th>
+                              <th>Description</th>
+                              <th>Date</th>
+                            </tr>
+                          </thead>
+                          <tbody id="scheduled-movements">
+                            <tr><td colspan="8" class="text-center">Loading…</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  `;
+
+                // ─── Obtener cuentas y actualizar balance y dropdown ─────────────────────────────
                 fetch("/users/getAccounts", { method: "POST", credentials: "include" })
                     .then(r => r.ok ? r.json() : Promise.reject())
                     .then(accts => {
+                        // Actualizar balance total
                         const total = accts
                             .reduce((sum, a) => sum + parseFloat(a.balance), 0)
                             .toFixed(2);
                         document.querySelector(".balance-amount").textContent = `$${total}`;
-                    })
-                    .catch(console.error);
 
-                // ─── 2) Pintar “All movements” ────────────────────────
+                        // Actualizar dropdown con accountNumber
+                        const select = document.getElementById("account-select");
+                        if (!accts.length) {
+                            select.innerHTML = `<option disabled>No accounts available</option>`;
+                        } else {
+                            select.innerHTML = accts.map(a => `
+                  <option value="${a.accountNumber}">Account number: ${a.accountNumber}</option>
+                `).join("");
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                document.querySelector(".balance-amount").textContent = "$0.00";
+                                const select = document.getElementById("account-select");
+                                select.innerHTML = `<option disabled>Error loading accounts</option>`;
+                            });
 
+                // ─── Cargar movimientos completos (igual que antes) ─────────────────────────────
                 fetch("/transaction/all", { credentials: "include" })
                     .then(r => r.ok ? r.json() : Promise.reject())
                     .then(data => {
                         const tbody = document.getElementById("all-movements");
                         if (!data.length) {
-                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No movements yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No movements yet.</td></tr>`;
                             return;
                         }
                         tbody.innerHTML = data.map(tx => {
@@ -1012,57 +1112,66 @@
                                     : tx.type==="TRANSFER"   ? "text-warning"
                                         : "";
                             const sign = (tx.type==="WITHDRAWAL"||tx.type==="TRANSFER") ? "-" : "+";
-                            return `
-          <tr>
-            <td>#${tx.id}</td>
-            <td class="${cls}">${tipo}</td>
-            <td>${tx.destination}</td>
-            <td class="${cls}">${sign} $${Math.abs(tx.amount).toFixed(2)}</td>
-            <td>${tx.description||""}</td>
-            <td>${tx.date.split("T")[0]}</td>
-          </tr>
-        `;
+
+                                        return `
+                      <tr>
+                        <td>#${tx.id}</td>
+                        <td class="${cls}">${tipo}</td>
+                        <td>${tx.origin !== null && tx.origin !== undefined ? tx.origin : ""}</td>
+                        <td>${tx.destination || ""}</td>
+                        <td>${tx.benefitTitle || ""}</td>
+                        <td class="${cls}">${sign} $${Math.abs(tx.amount).toFixed(2)}</td>
+                        <td>${tx.description || ""}</td>
+                        <td>${tx.date.replace("T", " ").substring(0, 16)}</td>
+                      </tr>
+                    `;
                         }).join("");
                     })
                     .catch(err => {
                         console.error(err);
                         document.getElementById("all-movements").innerHTML =
-                            `<tr><td colspan="6" class="text-center text-danger">Error loading movements.</td></tr>`;
+                            `<tr><td colspan="8" class="text-center text-danger">Error loading movements.</td></tr>`;
                     });
 
+                // ─── Cargar transacciones programadas ─────────────────────────────
                 fetch("/transaction/scheduled/all", { credentials: "include" })
                     .then(res => res.ok ? res.json() : Promise.reject())
                     .then(data => {
                         const tbody = document.getElementById("scheduled-movements");
                         if (!data.length) {
-                            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No scheduled transactions yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No scheduled transactions yet.</td></tr>`;
                             return;
                         }
                         tbody.innerHTML = data.map(tx => {
                             const isExecuted = tx.executed;
-                            const rowClass   = isExecuted ? "text-warning" : "text-danger"; // amarillo o rojo
+                            const rowClass   = isExecuted ? "text-warning" : "text-danger";
                             const statusText = isExecuted ? "Scheduled (Executed)" : "Scheduled (Pending)";
                             const sign = tx.amount >= 0 ? "+" : "-";
+
+                            const dateTime = new Date(tx.scheduledDatetime);
+                            const formattedDate = dateTime.toLocaleDateString();
+                            const formattedTime = dateTime.toLocaleTimeString();
+
                             return `
-        <tr>
-          <td>#${tx.id}</td>
-          <td class="${rowClass}">${statusText}</td>
-          <td>${tx.userDestiny}</td>
-          <td class="${rowClass}">${sign} $${parseFloat(tx.amount).toFixed(2)}</td>
-          <td>${tx.description || ""}</td>
-          <td>${tx.scheduledDatetime.split("T")[0]}</td>
-        </tr>
-      `;
+                      <tr>
+                        <td>#${tx.id}</td>
+                        <td class="${rowClass}">${statusText}</td>
+                        <td>${tx.origin || ""}</td>
+                        <td>${tx.userDestiny || ""}</td>
+                        <td>${tx.benefit || ""}</td>
+                        <td class="${rowClass}">${sign} $${parseFloat(tx.amount).toFixed(2)}</td>
+                        <td>${tx.description || ""}</td>
+                        <td>${formattedDate} ${formattedTime}</td>
+                      </tr>
+                    `;
                         }).join("");
                     })
                     .catch(err => {
                         console.error(err);
                         document.getElementById("scheduled-movements").innerHTML =
-                            `<tr><td colspan="6" class="text-center text-danger">Error loading scheduled transactions.</td></tr>`;
+                            `<tr><td colspan="8" class="text-center text-danger">Error loading scheduled transactions.</td></tr>`;
                     });
-
             }
-
 
             if (view === "wallets") {
                 // 1) Renderizamos la plantilla HTML
@@ -1373,15 +1482,18 @@
                 }
             }
 
-            if(view === "point_store"){
-                fetch("/points/top?n=1")
+            if(view === "point_store") {
+                fetch("/points/my", {
+                    method: "GET",
+                    credentials: "include"
+                })
                     .then(res => {
                         if (!res.ok) throw new Error("Network response was not ok");
                         return res.json();
                     })
                     .then(data => {
-                        if (!data.length) return;
-                        const { accumulatedPoints } = data[0];
+                        // data es un SystemPointsDTO para el usuario actual
+                        const accumulatedPoints = data.accumulatedPoints ?? 0;
 
                         // Setear solo los puntos acumulados
                         const pointsDisplay = document.getElementById("user-points-amount");
@@ -1390,6 +1502,33 @@
                         }
                     })
                     .catch(err => console.error("Error loading points:", err));
+
+                document.querySelectorAll("#point-store-section .btn-success").forEach(button => {
+                    button.addEventListener("click", () => {
+                        const pointsText = button.textContent.trim();
+                        const points = parseInt(pointsText);
+
+                        if (isNaN(points)) return alert("Invalid points value");
+
+                        fetch("/points/redeem", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            credentials: "include",
+                            body: JSON.stringify({ points })
+                        })
+                            .then(res => {
+                                if (!res.ok) return res.text().then(t => Promise.reject(t));
+                                return res.text();
+                            })
+                            .then(message => {
+                                alert(message || "Reward redeemed successfully!");
+                                loadView("point_store");
+                            })
+                            .catch(err => alert("Error redeeming points: " + err));
+                    });
+                });
             }
 
             if (view === "statistics") {
@@ -1449,9 +1588,7 @@
         (async () => {
             user = await fetchCurrentUser();
             if (!user) return;
-
             cuentas = await getAccounts();
-
 
             const userName = user.name || "Desconocido";
             const userEmail = user.email || "Sin email";
@@ -1467,6 +1604,9 @@
                 loadView(a.dataset.section);
 
             }));
+
+
+
     });
 </script>
 
@@ -1970,7 +2110,6 @@
             });
     });
 
-
 </script>
 
 <script>
@@ -2018,8 +2157,9 @@
         const formData = new FormData(form);
 
         fetch(form.action, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            credentials: "include"
+            method: "POST",
+            credentials: "include",
+            body: formData
         })
             .then(response => {
                 if (response.ok) {

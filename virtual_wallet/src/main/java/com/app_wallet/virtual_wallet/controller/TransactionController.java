@@ -7,8 +7,10 @@ import com.app_wallet.virtual_wallet.entity.ScheduledTransactionEntity;
 import com.app_wallet.virtual_wallet.entity.UserEntity;
 import com.app_wallet.virtual_wallet.model.Category;
 import com.app_wallet.virtual_wallet.repository.AccountRepository;
+import com.app_wallet.virtual_wallet.repository.BenefitRepository;
 import com.app_wallet.virtual_wallet.repository.ScheduledTransactionRepository;
 import com.app_wallet.virtual_wallet.service.AccountService;
+import com.app_wallet.virtual_wallet.service.BenefitService;
 import com.app_wallet.virtual_wallet.service.NotificationService;
 import com.app_wallet.virtual_wallet.service.TransactionService;
 import jakarta.servlet.http.HttpSession;
@@ -31,17 +33,23 @@ public class TransactionController {
 
     private final TransactionService transactionService;
     private final AccountRepository accountRepository;
+    private final BenefitService benefitService;
     private final NotificationService notificationService;
+    private static final BigDecimal TRANSFER_FEE = BigDecimal.valueOf(4500);
+    private static final BigDecimal WITHDRAWAL_FEE = BigDecimal.valueOf(6000);
 
     @Autowired
     private ScheduledTransactionRepository scheduledTransactionRepository;
 
     @Autowired
-    public TransactionController(TransactionService transactionService,  AccountRepository accountRepository, NotificationService notificationService,  ScheduledTransactionRepository scheduledTransactionRepository) {
+    public TransactionController(TransactionService transactionService,  AccountRepository accountRepository,
+                                 NotificationService notificationService,  ScheduledTransactionRepository scheduledTransactionRepository,
+                                 BenefitService benefitService) {
         this.transactionService = transactionService;
         this.accountRepository = accountRepository;
         this.notificationService = notificationService;
         this.scheduledTransactionRepository = scheduledTransactionRepository;
+        this.benefitService = benefitService;
     }
 
     @PostMapping("/send")
@@ -53,7 +61,10 @@ public class TransactionController {
             @RequestParam String category,
             HttpSession session
     ) {
+
+
         UserDTO user = (UserDTO) session.getAttribute("user");
+
         if (user == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -69,11 +80,16 @@ public class TransactionController {
             return ResponseEntity.status(404).body("Origin account not found");
         }
 
-        if (originAccount.getBalance().compareTo(amount) < 0) {
+        Map<String, Object> result = benefitService.applyBenefits(user.getId(), amount, TRANSFER_FEE, "TRANSFER");
+        BigDecimal amountWithFee = (BigDecimal) result.get("total");
+        String benefitTitle = (String) result.get("benefit");
+
+        if (originAccount.getBalance().compareTo(amountWithFee) < 0) {
             return ResponseEntity.status(400).body("Insufficient funds");
         }
 
-        originAccount.setBalance(originAccount.getBalance().subtract(amount));
+
+        originAccount.setBalance(originAccount.getBalance().subtract(amountWithFee));
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
 
         UserEntity destinationUser = destinationAccount.getUser();
@@ -82,19 +98,7 @@ public class TransactionController {
         accountRepository.save(originAccount);
         accountRepository.save(destinationAccount);
 
-        TransactionDTO dto = new TransactionDTO();
-
-        dto.setAmount(amount);
-        dto.setDescription(description);
-        dto.setType("TRANSFER");
-        dto.setDate(LocalDateTime.now());
-        dto.setDestination(String.valueOf(accountNumber));
-        dto.setCategory(Category.valueOf(category));
-
-
-        transactionService.saveTransaction(dto, user.getId(), accountOriginId);
-
-        /*
+         /*
         SI QUIEREN PROBAR LOS MESAJES QUITEN ESTE COMENTARIO, PERO NO ABUSEN DE ESO PORQUE SINO SE NOS ACABA LA PRUEBA GRATIS
 
         !!OJO QUE SOLO FUNCIONA CON EL NUMERO DE CRISTHIAN Y EL MIO!!!
@@ -112,11 +116,28 @@ public class TransactionController {
 
          */
 
+        TransactionDTO dto = new TransactionDTO();
+
+        dto.setAmount(amount);
+        dto.setDescription(description);
+        dto.setType("TRANSFER");
+        dto.setDate(LocalDateTime.now());
+        dto.setDestination(String.valueOf(accountNumber));
+        dto.setCategory(Category.valueOf(category));
+
+        if (benefitTitle != null) {
+            dto.setBenefitTitle(benefitTitle);
+        }else{
+            dto.setBenefitTitle("NONE");
+        }
+
+        transactionService.saveTransaction(dto, user.getId(), accountOriginId);
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Transaction completed successfully");
         return ResponseEntity.ok(response);
+
     }
 
 
@@ -136,13 +157,20 @@ public class TransactionController {
         if (acct == null) {
             return ResponseEntity.status(404).body("Account not found");
         }
-        if (acct.getBalance().compareTo(amount) < 0) {
+
+
+        Map<String, Object> benefitResult = benefitService.applyBenefits(user.getId(), amount, TRANSFER_FEE, "WITHDRAWAL");
+        BigDecimal amountWithFee = (BigDecimal) benefitResult.get("total");
+        String benefitTitle = (String) benefitResult.get("benefit");
+
+        if (acct.getBalance().compareTo(amountWithFee) < 0) {
             return ResponseEntity.status(400).body("Insufficient funds");
         }
 
-        acct.setBalance(acct.getBalance().subtract(amount));
 
+        acct.setBalance(acct.getBalance().subtract(amountWithFee));
         accountRepository.save(acct);
+
 
         TransactionDTO dto = new TransactionDTO();
         dto.setAmount(amount);
@@ -151,10 +179,19 @@ public class TransactionController {
         dto.setDate(LocalDateTime.now());
         dto.setDestination(String.valueOf(acct.getAccountNumber()));
         dto.setCategory(Category.OTHER);
+
+
+        if (benefitTitle != null) {
+            dto.setBenefitTitle(benefitTitle);
+        }else{
+            dto.setBenefitTitle("NONE");
+        }
+
         transactionService.saveTransaction(dto, user.getId(), acct.getId());
 
         return ResponseEntity.ok("Withdrawal completed successfully");
     }
+
 
 
     @GetMapping("/recent")
@@ -298,17 +335,16 @@ public class TransactionController {
         UserDTO user = (UserDTO) session.getAttribute("user");
         if (user == null) return Collections.emptyList();
 
-        // 1) Obtengo tu LinkedList:
+
         com.app_wallet.virtual_wallet.utils.LinkedList<TransactionDTO> ll =
                 transactionService.getAllTransactions(user.getId());
 
-        // 2) Lo paso a ArrayList para poder streamearlo:
         List<TransactionDTO> all = new ArrayList<>();
         for (TransactionDTO dto : ll) {
             all.add(dto);
         }
 
-        // 3) Filtro SCHEDULED / origin o destiny
+
         return all.stream()
                 .filter(tx -> "SCHEDULED".equals(tx.getType())
                         && (tx.getOrigin().equals(user.getId())

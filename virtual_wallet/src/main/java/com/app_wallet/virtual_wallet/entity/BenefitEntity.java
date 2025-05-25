@@ -13,21 +13,19 @@ public class BenefitEntity {
 
     private boolean isActive;
 
-    public BenefitEntity() {
-    }
+    @Column(name = "user_id")
+    private Long userId;
 
-    public BenefitEntity(Long id, String title, boolean isActive) {
-        this.id = id;
+    public BenefitEntity() {}
+
+    public BenefitEntity(String title, boolean isActive, Long userId) {
         this.title = title;
         this.isActive = isActive;
+        this.userId = userId;
     }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -46,4 +44,11 @@ public class BenefitEntity {
         isActive = active;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }

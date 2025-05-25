@@ -37,9 +37,14 @@ public class TransactionEntity {
     @Column(nullable = false)
     private Category category;
 
+    @Column(name = "benefit_title")
+    private String benefitTitle;
+
+
     public TransactionEntity() {}
 
-    public TransactionEntity(Long id, BigDecimal amount, String type, LocalDateTime date, Long accountOrigin, String userDestiny, String description, Long userId ) {
+    public TransactionEntity(Long id, BigDecimal amount, String type, LocalDateTime date, Long accountOrigin,
+                             String userDestiny, String description, Long userId ) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -117,4 +122,12 @@ public class TransactionEntity {
 
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+
+    public String getBenefitTitle() {
+        return benefitTitle;
+    }
+
+    public void setBenefitTitle(String benefitTitle) {
+        this.benefitTitle = benefitTitle;
+    }
 }

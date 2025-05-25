@@ -1,11 +1,13 @@
 package com.app_wallet.virtual_wallet.controller;
 
 import com.app_wallet.virtual_wallet.dto.AccountDTO;
+import com.app_wallet.virtual_wallet.dto.BenefitDTO;
 import com.app_wallet.virtual_wallet.dto.UserDTO;
 
 import com.app_wallet.virtual_wallet.model.Category;
 import com.app_wallet.virtual_wallet.repository.CustomUserRepository;
 import com.app_wallet.virtual_wallet.service.AccountService;
+import com.app_wallet.virtual_wallet.service.BenefitService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ public class UserController {
     private CustomUserRepository customUserRepository;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private BenefitService benefitService;
 
     // Registro de usuario
     @PostMapping("/register")
@@ -90,5 +94,18 @@ public class UserController {
         }
         return ResponseEntity.ok(user);
     }
+
+    @GetMapping("/getNameBenefit")
+    @ResponseBody
+    public ResponseEntity<?> getNameBenefit(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Usuario no autenticado");
+        }
+
+        BenefitDTO benefitInfo = benefitService.getActualBenefit(user.getId());
+        return ResponseEntity.ok(benefitInfo);
+    }
+
 
 }
