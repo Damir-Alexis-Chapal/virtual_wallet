@@ -269,7 +269,6 @@
         const content = document.getElementById("main-content");
         const logoutLink = document.getElementById("logout-link");
 
-
         const views = {
             home: `
                 <div class="settings-container">
@@ -1506,13 +1505,31 @@
                     })
                     .catch(err => console.error("Error loading points:", err));
 
+                fetch("/users/getNameBenefit", {
+                    method: "GET",
+                    credentials: "include"
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Network response was not ok");
+                        return res.json();
+                    })
+                    .then(data => {
+                        const title = data.title || "No benefits";
+
+                        const benefitEl = document.getElementById("user-active-benefits");
+
+                        if (benefitEl) benefitEl.innerText = title;
+
+                    })
+                    .catch(err => console.error("Error loading profile benefit:", err));
+
                 document.querySelectorAll("#point-store-section .btn-success").forEach(button => {
                     button.addEventListener("click", () => {
                         const pointsText = button.textContent.trim();
                         const points = parseInt(pointsText);
 
                         if (isNaN(points)) return alert("Invalid points value");
-
+                        console.log("Redeeming points:", points);
                         fetch("/points/redeem", {
                             method: "POST",
                             headers: {

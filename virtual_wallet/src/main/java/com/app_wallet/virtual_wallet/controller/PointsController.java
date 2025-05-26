@@ -88,6 +88,7 @@ public class PointsController {
         }
 
         boolean success = service.redeemPoints(user.getId(), pointsToRedeem);
+        System.out.println("\n\nestado de la respuesta en redeem\n\n"+success +"\n\n");
         if (!success) {
             return ResponseEntity.badRequest().body("Insufficient points or invalid request");
         }
