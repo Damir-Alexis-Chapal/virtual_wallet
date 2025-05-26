@@ -66,21 +66,23 @@ public class WalletService {
       throw new IllegalArgumentException("Amount must be positive");
     }
 
-    var from = accountRepo.findByWalletId(fromWalletId).stream().findFirst()
-            .orElseThrow(() -> new IllegalStateException("Origin wallet not found"));
-    var to = accountRepo.findByWalletId(toWalletId).stream().findFirst()
-            .orElseThrow(() -> new IllegalStateException("Target wallet not found"));
+    WalletEntity from = walletRepo.findById(fromWalletId)
+            .orElseThrow(() -> new IllegalArgumentException("Origin wallet not found"));
+    WalletEntity to = walletRepo.findById(toWalletId)
+            .orElseThrow(() -> new IllegalArgumentException("Target wallet not found"));
 
-    if (from.getBalance().compareTo(amount) < 0) {
+    if (from.getAmount().compareTo(amount) < 0) {
       throw new IllegalArgumentException("Insufficient funds");
     }
 
-    from.setBalance(from.getBalance().subtract(amount));
-    to.setBalance(to.getBalance().add(amount));
+    from.setAmount(from.getAmount().subtract(amount));
+    to.setAmount(to.getAmount().add(amount));
 
-    accountRepo.save(from);
-    accountRepo.save(to);
+    walletRepo.save(from);
+    walletRepo.save(to);
   }
+
+
 
   @Transactional
   public void deleteWallet(Long walletId) {

@@ -63,7 +63,6 @@ public class PointsController {
     }
 
 
-
     @GetMapping("/current")
     public ResponseEntity<SystemPointsDTO> current(@RequestParam Long userId) {
 

@@ -92,7 +92,7 @@ public class PointsService {
             return false;
         }
 
-        point.setAccumulatedPoints(point.getAccumulatedPoints());
+        point.setAccumulatedPoints(point.getAccumulatedPoints()-points);
         repo.save(point);
 
         return true;

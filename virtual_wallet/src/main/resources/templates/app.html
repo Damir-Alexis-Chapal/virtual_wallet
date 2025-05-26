@@ -190,17 +190,6 @@
             })
             .catch(console.error);
 
-        // 3) Wallets
-        fetch(`/wallets?userId=${user.id} `)
-            .then(r => r.ok ? r.json() : Promise.reject("Error wallets"))
-            .then(ws => {
-                const totalWallets = ws.reduce((sum, w) => sum + parseFloat(w.balance), 0).toFixed(2);
-                // por ejemplo, muestra en un badge o en la misma .balance-amount:
-                document.querySelectorAll(".balance-amount").forEach(el => {
-                    el.textContent = `$${totalWallets}`;
-                });
-            })
-            .catch(console.error);
     }
     //por favor no borrar ninguna de las 3, sino
     //todo se jode
@@ -1348,13 +1337,25 @@
                 // Event listeners para otras funciones
                 document.getElementById("wallet-transfer-form").addEventListener("submit", e => {
                     e.preventDefault();
-                    const from   = document.getElementById("wallet-from").value;
-                    const to     = document.getElementById("wallet-to").value;
-                    const amount = document.getElementById("wallet-transfer-amount").value;
 
-                    if (!from || !to || !amount || from === to) return alert("Check input values");
+                    const formData = new URLSearchParams();
+                    formData.append("fromWalletId", document.getElementById("wallet-from").value);
+                    formData.append("toWalletId", document.getElementById("wallet-to").value);
+                    formData.append("amount", document.getElementById("wallet-transfer-amount").value);
 
-                    fetch(`/wallets/transfer?fromWalletId=${from}&toWalletId=${to}&amount=${amount}`, { method: "POST" })
+                    const from = formData.get("fromWalletId");
+                    const to = formData.get("toWalletId");
+                    const amount = formData.get("amount");
+
+                    if (!from || !to || !amount || from === to) {
+                        return alert("Check input values");
+                    }
+                    console.log("FROM:", from, "TO:", to, "AMOUNT:", amount);
+                    fetch("/wallets/transfer", {
+                        method: "POST",
+                        body: formData,
+                        credentials: "include",
+                    })
                         .then(r => {
                             if (!r.ok) return r.text().then(text => { throw new Error(text) });
                             return r.text();
@@ -1365,6 +1366,8 @@
                         })
                         .catch(err => alert(err.message));
                 });
+
+
 
                 // 4) Crear nueva wallet
                 document.getElementById("wallet-create-form").addEventListener("submit", e => {
