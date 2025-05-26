@@ -1,18 +1,16 @@
 package com.app_wallet.virtual_wallet.controller;
 
-import com.app_wallet.virtual_wallet.model.Category;
+import com.app_wallet.virtual_wallet.dto.UserDTO;
 import com.app_wallet.virtual_wallet.service.StatisticsService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/stats/patterns")
+@RequestMapping("/stats")
 public class StatisticsController {
 
     private final StatisticsService stats;
@@ -21,38 +19,21 @@ public class StatisticsController {
         this.stats = stats;
     }
 
-    @GetMapping("/categories")
-    public List<Map<String,Object>> categoryPatterns(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return Collections.emptyList();
-        }
+    @GetMapping("/patterns/categories")
+    public List<Map<String, Object>> categoryPatterns(HttpSession session) {
 
-        return stats.categoryTransitionCounts(userId)
-                .entrySet()
-                .stream()
-                .map(e -> {
-                    Map<String,Object> m = new HashMap<>();
-                    m.put("category", e.getKey().name());
-                    m.put("count",    e.getValue());
-                    return m;
-                })
-                .collect(Collectors.toList());
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) return List.of();
+        Long userId = user.getId();
+        return stats.getCategoryStatistics(userId);
     }
 
-    @GetMapping("/stats/clients/frequent")
-    public List<Map<String,Object>> frequentTransfers(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) return Collections.emptyList();
-        return stats.frequentClientTransfers(userId);
-    }
-
-
-    @GetMapping("/stats/clients/groups")
-    public List<List<Map<String,Object>>> affinityGroups(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) return Collections.emptyList();
-        return stats.findAffinityGroups(userId);
+    @GetMapping("/clients/frequent")
+    public List<Map<String, Object>> frequentTransfers(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) return List.of();
+        Long userId = user.getId();
+        return stats.getFrequentTransfers(userId);
     }
 
 }

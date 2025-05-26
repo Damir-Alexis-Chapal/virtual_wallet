@@ -150,7 +150,7 @@
     </div>
 </div>
 
-
+<!-- Main script, básicamente controla toda la app-->
 <script>
     let cuentas = [];
     let user = null;
@@ -462,33 +462,25 @@
               </div>
 `,
             statistics: `
-          <div class="container mt-4">
-            <h2 class="mb-4">Statistics</h2>
+                  <div class="container mt-4">
+                    <h2 class="mb-4">Statistics</h2>
 
-            <!-- 1) Patrones por categoría -->
-            <div class="card custom-card mb-4">
-              <div class="card-body">
-                <h5 class="card-title">Spending Patterns by Category</h5>
-                <canvas id="categoryChart"></canvas>
-              </div>
-            </div>
+                    <!-- 1) Patrones por categoría -->
+                    <div class="card custom-card mb-4">
+                      <div class="card-body">
+                        <h5 class="card-title">Spending Patterns by Category</h5>
+                        <canvas id="categoryChart"></canvas>
+                      </div>
+                    </div>
 
-            <!-- 2) Transferencias frecuentes -->
-            <div class="card custom-card mb-4">
-              <div class="card-body">
-                <h5 class="card-title">Frequent Transfer Targets</h5>
-                <canvas id="clientGraphChart"></canvas>
-              </div>
-            </div>
+                    <!-- 2) Transferencias frecuentes -->
+                    <div class="card custom-card mb-4">
+                      <div class="card-body">
+                        <h5 class="card-title">Frequent Transfer Targets</h5>
+                        <canvas id="clientGraphChart"></canvas>
+                      </div>
+                    </div>
 
-            <!-- 3) Grupos de afinidad -->
-            <div class="card custom-card mb-4">
-              <div class="card-body">
-                <h5 class="card-title">Affinity Groups</h5>
-                <div id="affinity-groups" class="d-flex flex-column gap-2 text-light"></div>
-              </div>
-            </div>
-          </div>
         `,
             bank_accounts:`
                 <div class="settings-container">
@@ -1570,54 +1562,142 @@
             }
 
             if (view === "statistics") {
-                // 1) Category transitions (barras)
-                fetch("/stats/patterns/categories")
-                    .then(r=>r.json())
-                    .then(data=>{
-                        const labels = data.map(d=>d.category);
-                        const counts = data.map(d=>d.count);
-                        const ctx = document.getElementById("categoryChart").getContext("2d");
-                        new Chart(ctx, {
+                // 1) Category statistics (barras)
+                console.log("Llamando a /stats/patterns/categories...");
+                fetch("/stats/patterns/categories", {
+                    method: "GET",
+                    credentials: "include"
+                })
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log("Category data:", data);
+                        const container = document.getElementById("categoryChart");
+
+                        if (!data || data.length === 0) {
+                            container.innerHTML = '<p class="text-center text-muted">No category data available.</p>';
+                            return;
+                        }
+
+                        const labels = data.map(d => d.category);
+                        const counts = data.map(d => d.count);
+
+                        // Destruir gráfico anterior si existe
+                        if (window.categoryChart instanceof Chart) {
+                            window.categoryChart.destroy();
+                        }
+
+                        const ctx = container.getContext("2d");
+                        window.categoryChart = new Chart(ctx, {
                             type: "bar",
-                            data: { labels, datasets:[{ label:"Transitions", data:counts }] },
+                            data: {
+                                labels,
+                                datasets: [{
+                                    label: "Transactions",
+                                    data: counts,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                                }]
+                            },
                             options: {
-                                scales: { y:{ beginAtZero:true, ticks:{ color:"white" }}, x:{ ticks:{ color:"white" }} },
-                                plugins: { legend:{ display:false } }
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: { color: "white" },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    },
+                                    x: {
+                                        ticks: { color: "white" },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        enabled: true,
+                                        mode: 'index',
+                                        intersect: false
+                                    }
+                                }
                             }
                         });
-                    }).catch(console.error);
+                    })
+                    .catch(error => {
+                        console.error("Error loading category data:", error);
+                        document.getElementById("categoryChart").innerHTML =
+                            '<p class="text-center text-danger">Error loading category data.</p>';
+                    });
 
                 // 2) Frequent Transfers (barras horizontales)
-                fetch("/stats/clients/frequent")
-                    .then(r=>r.json())
-                    .then(data=>{
-                        const labels = data.map(d=>d.label);
-                        const counts = data.map(d=>d.count);
-                        const ctx = document.getElementById("clientGraphChart").getContext("2d");
-                        new Chart(ctx, {
+                fetch("/stats/clients/frequent", {
+                    method: "GET",
+                    credentials: "include"
+                })
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log("Frequent transfers:", data);
+                        const container = document.getElementById("clientGraphChart");
+
+                        if (!data || data.length === 0) {
+                            container.innerHTML = '<p class="text-center text-muted">No frequent transfers data available.</p>';
+                            return;
+                        }
+
+                        const labels = data.map(d => d.label);
+                        const counts = data.map(d => d.count);
+
+                        // Destruir gráfico anterior si existe
+                        if (window.clientGraphChart instanceof Chart) {
+                            window.clientGraphChart.destroy();
+                        }
+
+                        const ctx = container.getContext("2d");
+                        window.clientGraphChart = new Chart(ctx, {
                             type: "bar",
-                            data: { labels, datasets:[{ label:"Transfers", data:counts }] },
+                            data: {
+                                labels,
+                                datasets: [{
+                                    label: "Transfers",
+                                    data: counts,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                                }]
+                            },
                             options: {
                                 indexAxis: 'y',
-                                scales: { x:{ beginAtZero:true, ticks:{ color:"white" }}, y:{ ticks:{ color:"white" }} },
-                                plugins: { legend:{ display:false } }
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        ticks: { color: "white" },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    },
+                                    y: {
+                                        ticks: { color: "white" },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        enabled: true,
+                                        mode: 'index',
+                                        intersect: false
+                                    }
+                                }
                             }
                         });
-                    }).catch(console.error);
+                    })
+                    .catch(error => {
+                        console.error("Error loading frequent transfers:", error);
+                        document.getElementById("clientGraphChart").innerHTML =
+                            '<p class="text-center text-danger">Error loading frequent transfers data.</p>';
+                    });
 
-                // 3) Affinity groups (badges)
-                fetch("/stats/clients/groups")
-                    .then(r=>r.json())
-                    .then(groups=>{
-                        const container = document.getElementById("affinity-groups");
-                        container.innerHTML = groups.length
-                            ? groups.map((grp,i)=>`
-            <div class="badge bg-secondary p-2">
-              Group ${i+1}: ${grp.map(u=>u.label).join(", ")}
-            </div>
-          `).join("")
-                            : `<p class="text-center text-muted">No affinity groups.</p>`;
-                    }).catch(console.error);
             }
 
         }
@@ -1644,10 +1724,10 @@
             }));
 
 
-
     });
 </script>
 
+<!-- Modales-->
 
 <!-- Modal de confirmación de logout -->
 <div class="modal fade" id="logout-modal" tabindex="-1" aria-labelledby="logout-modal-label" aria-hidden="true">
