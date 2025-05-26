@@ -53,8 +53,6 @@ public class TransactionService {
         TransactionEntity entity = TransactionMapper.toEntity(dto, userId, accountOriginId);
         transactionRepository.save(entity);
         pointsService.addPointsForTransaction(userId, dto.getType(), dto.getAmount());
-
-
     }
 
     public LinkedList<TransactionDTO> getRecentTransactions(Long userId) {

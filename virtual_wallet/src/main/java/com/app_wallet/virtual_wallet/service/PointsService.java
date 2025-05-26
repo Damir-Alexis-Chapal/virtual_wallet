@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,12 +42,15 @@ public class PointsService {
 
     @Transactional
     public void addPointsForTransaction(Long userId, String type, BigDecimal amount) {
-        int delta = switch (type) {
-            case "DEPOSIT"    -> amount.divide(BigDecimal.valueOf(100)).intValue() * 1;
-            case "WITHDRAWAL" -> amount.divide(BigDecimal.valueOf(100)).intValue() * 2;
-            case "TRANSFER"   -> amount.divide(BigDecimal.valueOf(100)).intValue() * 3;
-            default           -> 0;
+        BigDecimal baseUnits = amount.divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
+
+        BigDecimal delta = switch (type) {
+            case "DEPOSIT"    -> baseUnits.multiply(BigDecimal.valueOf(0.01));
+            case "WITHDRAWAL" -> baseUnits.multiply(BigDecimal.valueOf(0.02));
+            case "TRANSFER"   -> baseUnits.multiply(BigDecimal.valueOf(0.03));
+            default           -> BigDecimal.ZERO;
         };
+        int deltaPoints = delta.intValue();
 
         SystemPointsEntity entity = repo.findByUserId(userId).orElseGet(() -> {
             UserEntity user = userRepository.findById(userId)
@@ -55,7 +59,7 @@ public class PointsService {
         });
 
         pointsTree.eliminate(new SystemPoints(entity));
-        entity.addPoints(delta);
+        entity.addPoints(deltaPoints);
         repo.save(entity);
         pointsTree.addRoot(new SystemPoints(entity));
     }

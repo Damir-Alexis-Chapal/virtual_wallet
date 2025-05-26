@@ -801,31 +801,44 @@
                     loadView("history");
                 });
 
-                // Puntos y rango
                 fetch("/points/my")
                     .then(res => res.json())
                     .then(data => {
                         const accumulatedPoints = data.accumulatedPoints || 0;
-                        const rangeUser = data.rangeUser || "BRONZE";
-                        const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
-                        const maxPts = limits[rangeUser] || 500;
-                        const pct = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+                        const rangeUser = (data.rangeUser || "BRONZE").toUpperCase();
 
+                        // Definimos los límites de cada rango
+                        const ranges = {
+                            BRONZE:   { min: 0,    max: 500 },
+                            SILVER:   { min: 501,  max: 1000 },
+                            GOLD:     { min: 1001, max: 5000 },
+                            PLATINUM: { min: 5001, max: 10000 } // puedes ajustar este máximo según necesidades
+                        };
+
+                        const { min, max } = ranges[rangeUser] || { min: 0, max: 500 };
+                        const pointsInRange = accumulatedPoints - min;
+                        const totalRange = max - min;
+                        const pct = Math.min(100, Math.round(pointsInRange / totalRange * 100));
+
+                        // Mostrar el nombre del rango
                         document.getElementById("user-rank-badge").textContent =
                             rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
 
+                        // Actualizar barra de progreso
                         const bar = document.getElementById("user-rank-progress");
                         bar.style.width = pct + "%";
                         bar.setAttribute("aria-valuenow", pct);
 
+                        // Mostrar puntos actuales / límite del rango actual
                         document.getElementById("user-rank-text").textContent =
-                            `${accumulatedPoints} / ${maxPts} pts`;
+                            `${accumulatedPoints} / ${max} pts`;
                     })
                     .catch(err => {
                         console.error("Error loading points:", err);
-                        // En caso de error mostrar 0 pts
                         document.getElementById("user-rank-text").textContent = `0 / 500 pts`;
                     });
+
+
 
                 // Transacciones recientes
                 fetch("/transaction/recent")
@@ -895,31 +908,42 @@
                         return res.json();
                     })
                     .then(data => {
-
                         const accumulatedPoints = data.accumulatedPoints ?? 0;
-                        const rangeUser = data.rangeUser || "BRONZE";
-                        const limits = { BRONZE: 500, SILVER: 1000, GOLD: 5000, PLATINUM: Number.MAX_SAFE_INTEGER };
-                        const maxPts = limits[rangeUser];
-                        const pct = Math.min(100, Math.round(accumulatedPoints / maxPts * 100));
+                        const rangeUser = (data.rangeUser || "BRONZE").toUpperCase();
 
+                        const ranges = {
+                            BRONZE:   { min: 0,    max: 500 },
+                            SILVER:   { min: 501,  max: 1000 },
+                            GOLD:     { min: 1001, max: 5000 },
+                            PLATINUM: { min: 5001, max: 10000 } // Ajusta si deseas
+                        };
 
-                        document.getElementById("profile-rank-badge").textContent =
-                            rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+                        const { min, max } = ranges[rangeUser] || { min: 0, max: 500 };
+                        const pointsInRange = accumulatedPoints - min;
+                        const totalRange = max - min;
+                        const pct = Math.min(100, Math.round(pointsInRange / totalRange * 100));
 
+                        // Actualiza el badge con el nombre del rango
+                        const badge = document.getElementById("profile-rank-badge");
+                        if (badge) {
+                            badge.textContent = rangeUser.charAt(0) + rangeUser.slice(1).toLowerCase();
+                        }
 
+                        // Actualiza la barra de progreso
                         const bar = document.getElementById("profile-rank-progress");
                         if (bar) {
                             bar.style.width = pct + "%";
                             bar.setAttribute("aria-valuenow", pct);
                         }
 
-
+                        // Actualiza el texto del progreso
                         const text = document.getElementById("profile-rank-text");
                         if (text) {
-                            text.textContent = `${accumulatedPoints} / ${maxPts} pts`;
+                            text.textContent = `${accumulatedPoints} / ${max} pts`;
                         }
                     })
                     .catch(err => console.error("Error loading profile points:", err));
+
 
                 fetch("/users/getNameBenefit", {
                     method: "GET",
