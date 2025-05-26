@@ -352,4 +352,45 @@ public class TransactionController {
                         .orElse(false)))
                 .collect(Collectors.toList());
     }
+
+    @PostMapping("/revert")
+    public ResponseEntity<?> revertTransaction(HttpSession session) {
+        UserDTO user = (UserDTO) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+
+        TransactionDTO lastTransaction = transactionService.getMostRecentTransaction(user.getId());
+
+        if (lastTransaction == null) {
+            return ResponseEntity.status(404).body("No transactions to revert");
+        }
+
+        try {
+            BigDecimal amount = lastTransaction.getAmount();
+            Long destiny = Long.valueOf(lastTransaction.getDestination());
+            AccountEntity originAccount = accountRepository.findById(lastTransaction.getOrigin()).orElse(null);
+            if (originAccount == null) {
+                return ResponseEntity.status(404).body("Origin account not found");
+            }
+            AccountEntity destinationAccount = accountRepository.findByAccountNumber(destiny).orElse(null);
+            if (destinationAccount == null) {
+                return ResponseEntity.status(404).body("Destination account not found");
+            }
+
+            originAccount.setBalance(originAccount.getBalance().add(amount));
+            destinationAccount.setBalance(destinationAccount.getBalance().subtract(amount));
+
+            accountRepository.save(originAccount);
+            accountRepository.save(destinationAccount);
+
+            transactionService.deleteTransactionById(lastTransaction.getId());
+            return ResponseEntity.ok("Transaction reverted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error reverting transaction");
+        }
+    }
+
+
 }

@@ -120,4 +120,17 @@ public class TransactionService {
         return list;
     }
 
+    public TransactionDTO getMostRecentTransaction(Long userId) {
+        TransactionMapper mapper = new TransactionMapper();
+        List<TransactionEntity> transactions = transactionRepository.findByUserIdOrderByDateDesc(userId);
+        if (transactions.isEmpty()) {
+            return null;
+        }
+        return mapper.toDTO(transactions.get(0));
+    }
+
+    public void deleteTransactionById(Long id) {
+        transactionRepository.deleteById(id);
+    }
+
 }
