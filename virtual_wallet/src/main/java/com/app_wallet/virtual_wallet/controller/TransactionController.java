@@ -13,6 +13,7 @@ import com.app_wallet.virtual_wallet.service.AccountService;
 import com.app_wallet.virtual_wallet.service.BenefitService;
 import com.app_wallet.virtual_wallet.service.NotificationService;
 import com.app_wallet.virtual_wallet.service.TransactionService;
+import com.app_wallet.virtual_wallet.utils.MyHashMap;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -312,7 +313,6 @@ public class TransactionController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error saving scheduled transaction: " + e.getMessage());
         }
-
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
